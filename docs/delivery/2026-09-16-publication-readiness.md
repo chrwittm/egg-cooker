@@ -1,7 +1,7 @@
 # Experimental 0.1.0 publication readiness
 
-**Status:** Public source published and initial CI verified; tag, release workflows and deployment not performed.
-**Scope:** First public source publication and GitHub Pages preparation for the accepted quick-cook MVP.
+**Status:** Experimental 0.1.0 prerelease and GitHub Pages deployment published and smoke-tested.
+**Scope:** First public source publication, release and GitHub Pages deployment for the accepted quick-cook MVP.
 
 ## Source and history
 
@@ -28,7 +28,7 @@ Verified on 2026-09-16 before the first source push:
 
 - The repository description, expected Pages URL and the topics `svelte`, `typescript`, `vite`, `playwright`, `github-pages`, `agentic-engineering`, `vibe-coding` and `educational` are published.
 - Private vulnerability reporting, the dependency graph, Dependabot alerts and Dependabot security updates are enabled. Existing secret protection and push protection remain enabled.
-- GitHub Pages uses GitHub Actions as its source. No workflow was dispatched and no site was deployed during this checkpoint.
+- GitHub Pages uses GitHub Actions as its source.
 
 ## Verification
 
@@ -41,14 +41,20 @@ npm run audit:all
 
 Result on 2026-09-16: formatting, lint, Svelte/TypeScript checks, local documentation links and production build passed; 92 domain/adapter tests, 1 release-script test and 132 Playwright checks across Chromium, Firefox and WebKit passed. The complete dependency audit reported zero vulnerabilities.
 
-## First source publication
+## Publication results
 
-- Local `main` through `b97d7a8` (`Record GitHub publication settings`) was pushed to `origin/main` on 2026-09-16.
+- Local `main` through release-evidence commit `703faa0` (`Record initial publication verification`) was pushed to `origin/main` on 2026-09-16.
 - GitHub Actions [Verify run 35105737402](https://github.com/chrwittm/egg-cooker/actions/runs/35105737402) completed successfully in 2m16s. Its published Vitest summary reported 2 passing test files and 92 passing tests.
-- No release tag was created, no release workflow was dispatched and no Pages deployment was performed.
+- Final pre-tag [Verify run 35106135159](https://github.com/chrwittm/egg-cooker/actions/runs/35106135159) also completed successfully for `703faa0`.
+- Annotated tag `v0.1.0` identifies commit `703faa0fdcca3df926b151496bd366d517c05251`. Local `npm run release:check -- v0.1.0` passed before the tag was pushed.
+- [Release candidate run 35107353296](https://github.com/chrwittm/egg-cooker/actions/runs/35107353296) passed in 3m06s. The downloaded artifact's outer GitHub digest was `70eb98e8d52017fd49502230e3af2c0fc1c5c34b77e44c62770c779f92dded4`; the packaged `app-0.1.0.tar.gz` checksum was `b068318a509e01c61ab6b086838cfcb505369df485f9b4b1b39767606ef1aa49`.
+- The archive, checksum and evidence were inspected, extracted and served locally. Build identity matched version `0.1.0`, commit `703faa0`; assets loaded and the primary demo entered Cooking.
+- The [Egg Cooker 0.1.0 GitHub release](https://github.com/chrwittm/egg-cooker/releases/tag/v0.1.0) was published as a prerelease with the approved archive, `SHA256SUMS` and `evidence.json`. A fresh download of the public archive matched the approved SHA-256 checksum.
 
-## External steps after the checkpoint
+## GitHub Pages deployment
 
-1. Create annotated `v0.1.0`, run `npm run release:check -- v0.1.0`, push the tag and run **Release candidate**.
-2. Inspect the candidate artifact/checksum, mark the GitHub release as a prerelease, then dispatch **Deploy Pages** for `v0.1.0`.
-3. Smoke-test the live URL, asset/reload behavior, `/egg-cooker/build-info.json`, consented location and denied/offline fallbacks. Record the tag, commit, workflow runs and hosted URL without overstating kitchen or device evidence.
+- [Deploy Pages run 35117563126](https://github.com/chrwittm/egg-cooker/actions/runs/35117563126) built and tested the exact tag commit, then deployed successfully in 3m04s. Its build summary reported 2 passing test files and 92 passing tests.
+- The live app is [https://chrwittm.github.io/egg-cooker/](https://chrwittm.github.io/egg-cooker/). The root page, hashed JavaScript and CSS assets and `/egg-cooker/build-info.json` returned HTTP 200. Build information reported `{"version":"0.1.0","commit":"703faa0fdcca3df926b151496bd366d517c05251"}`.
+- Browser smoke testing verified the configure screen, transition into Cooking, transition to Ready and a usable base-path reload. No console-visible startup failure occurred.
+- The live check did not grant the hosted page access to real coordinates and did not transmit them to the external providers. Automated coverage for consent, denial, stale and offline behavior passed, but deployed-origin provider acceptance remains untested and is not claimed here.
+- GitHub emitted Node 20 deprecation warnings for pinned `actions/configure-pages`, `actions/upload-artifact` and `actions/deploy-pages` revisions while successfully forcing them onto Node 24. This is future workflow maintenance, not a release failure; supported replacements must be reviewed and pinned by immutable SHA in a later change.

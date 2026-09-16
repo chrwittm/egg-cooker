@@ -2,9 +2,9 @@
 
 A browser-based, science-informed egg timer with pressure-adjusted estimates, continuous texture controls and an animated egg.
 
-> **Experimental 0.1.0 candidate.** The software is extensively tested, but its cooking model is not yet kitchen-calibrated. Treat the times as estimates, not as food-safety assurance.
+> **Experimental 0.1.0 prerelease.** The software is extensively tested, but its cooking model is not yet kitchen-calibrated. Treat the times as estimates, not as food-safety assurance.
 
-[Try the Egg Cooker](https://chrwittm.github.io/egg-cooker/) · [User guide](docs/user-guide.md) · [Privacy](PRIVACY.md)
+[Try the Egg Cooker](https://chrwittm.github.io/egg-cooker/) · [0.1.0 release](https://github.com/chrwittm/egg-cooker/releases/tag/v0.1.0) · [User guide](docs/user-guide.md) · [Privacy](PRIVACY.md)
 
 ![Egg Cooker configuration with size, temperature, texture and location controls](docs/assets/egg-cooker-configure.png)
 
