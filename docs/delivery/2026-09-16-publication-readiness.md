@@ -1,6 +1,6 @@
 # Experimental 0.1.0 publication readiness
 
-**Status:** Local source candidate ready; push, tag, release workflows and deployment not performed.
+**Status:** Publication checkpoint complete; push, tag, release workflows and deployment not performed.
 **Scope:** First public source publication and GitHub Pages preparation for the accepted quick-cook MVP.
 
 ## Source and history
@@ -22,6 +22,14 @@
 
 The Pages workflow still pins actions by immutable commit SHA. `actions/upload-pages-artifact` was updated from generation 3 to the exact generation-4 commit documented for custom Pages workflows: `7b1f4a764d45c48632c6b24a0339c27f5614fb0b`. This preserves supply-chain pinning while moving to the supported action interface; it is not a floating `@v4` reference.
 
+## GitHub repository settings
+
+Verified on 2026-09-16 before the first source push:
+
+- The repository description, expected Pages URL and the topics `svelte`, `typescript`, `vite`, `playwright`, `github-pages`, `agentic-engineering`, `vibe-coding` and `educational` are published.
+- Private vulnerability reporting, the dependency graph, Dependabot alerts and Dependabot security updates are enabled. Existing secret protection and push protection remain enabled.
+- GitHub Pages uses GitHub Actions as its source. No workflow was dispatched and no site was deployed during this checkpoint.
+
 ## Verification
 
 Run on macOS/Darwin arm64 with Node 24.20.0 and npm 11.19.0:
@@ -35,8 +43,7 @@ Result on 2026-09-16: formatting, lint, Svelte/TypeScript checks, local document
 
 ## External steps after the checkpoint
 
-1. Confirm repository metadata, private vulnerability reporting, dependency security settings and GitHub Actions as the Pages source.
-2. Push local `main`; verify the `Verify / verify` workflow before adding branch protection that requires it.
-3. Create annotated `v0.1.0`, run `npm run release:check -- v0.1.0`, push the tag and run **Release candidate**.
-4. Inspect the candidate artifact/checksum, mark the GitHub release as a prerelease, then dispatch **Deploy Pages** for `v0.1.0`.
-5. Smoke-test the live URL, asset/reload behavior, `/egg-cooker/build-info.json`, consented location and denied/offline fallbacks. Record the tag, commit, workflow runs and hosted URL without overstating kitchen or device evidence.
+1. Push local `main`; verify the `Verify / verify` workflow before adding branch protection that requires it.
+2. Create annotated `v0.1.0`, run `npm run release:check -- v0.1.0`, push the tag and run **Release candidate**.
+3. Inspect the candidate artifact/checksum, mark the GitHub release as a prerelease, then dispatch **Deploy Pages** for `v0.1.0`.
+4. Smoke-test the live URL, asset/reload behavior, `/egg-cooker/build-info.json`, consented location and denied/offline fallbacks. Record the tag, commit, workflow runs and hosted URL without overstating kitchen or device evidence.
