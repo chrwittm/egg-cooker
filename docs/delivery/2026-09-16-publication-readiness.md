@@ -1,6 +1,6 @@
 # Experimental 0.1.0 publication readiness
 
-**Status:** Publication checkpoint complete; push, tag, release workflows and deployment not performed.
+**Status:** Public source published and initial CI verified; tag, release workflows and deployment not performed.
 **Scope:** First public source publication and GitHub Pages preparation for the accepted quick-cook MVP.
 
 ## Source and history
@@ -41,9 +41,14 @@ npm run audit:all
 
 Result on 2026-09-16: formatting, lint, Svelte/TypeScript checks, local documentation links and production build passed; 92 domain/adapter tests, 1 release-script test and 132 Playwright checks across Chromium, Firefox and WebKit passed. The complete dependency audit reported zero vulnerabilities.
 
+## First source publication
+
+- Local `main` through `b97d7a8` (`Record GitHub publication settings`) was pushed to `origin/main` on 2026-09-16.
+- GitHub Actions [Verify run 35105737402](https://github.com/chrwittm/egg-cooker/actions/runs/35105737402) completed successfully in 2m16s. Its published Vitest summary reported 2 passing test files and 92 passing tests.
+- No release tag was created, no release workflow was dispatched and no Pages deployment was performed.
+
 ## External steps after the checkpoint
 
-1. Push local `main`; verify the `Verify / verify` workflow before adding branch protection that requires it.
-2. Create annotated `v0.1.0`, run `npm run release:check -- v0.1.0`, push the tag and run **Release candidate**.
-3. Inspect the candidate artifact/checksum, mark the GitHub release as a prerelease, then dispatch **Deploy Pages** for `v0.1.0`.
-4. Smoke-test the live URL, asset/reload behavior, `/egg-cooker/build-info.json`, consented location and denied/offline fallbacks. Record the tag, commit, workflow runs and hosted URL without overstating kitchen or device evidence.
+1. Create annotated `v0.1.0`, run `npm run release:check -- v0.1.0`, push the tag and run **Release candidate**.
+2. Inspect the candidate artifact/checksum, mark the GitHub release as a prerelease, then dispatch **Deploy Pages** for `v0.1.0`.
+3. Smoke-test the live URL, asset/reload behavior, `/egg-cooker/build-info.json`, consented location and denied/offline fallbacks. Record the tag, commit, workflow runs and hosted URL without overstating kitchen or device evidence.
