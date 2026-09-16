@@ -1,0 +1,25 @@
+# Source, dependency, and asset licensing
+
+Apache-2.0 is the selected reusable default, consistent with both inspected projects. The complete [license](../../LICENSE) is included. This avoids repeating a license-selection discussion for similar projects; a project with different ownership, distribution, or dependency requirements must revisit the choice.
+
+Before public distribution, confirm ownership and authority to license the new project's source. Preserve third-party copyright/license and applicable NOTICE material. Changing this project's license does not relicense dependencies or assets. Review source-availability, notice, and redistribution obligations for what actually ships, including a desktop runtime if introduced. The authoritative terms are the [Apache License 2.0 text](https://www.apache.org/licenses/LICENSE-2.0); this checklist is an engineering aid, not a substitute for reading applicable licenses.
+
+The application uses original CSS and system fonts with no bundled third-party images or audio. When adding assets, create a provenance table with file, creator, original source URL, exact license/version, retrieval date, modifications and required attribution. Keep the evidence; a search result labeled “free” is not a license. Prefer simple reusable terms; assess audio, icons, map styles/tiles, sample files and models individually.
+
+The [MVP science record](../product/specifications/0001-mvp-science.md) documents Open-Meteo weather/elevation data and Copernicus attribution. These are input-data terms, separate from the source-code license; the browser integration is implemented with links to Open-Meteo, Copernicus, CC BY 4.0 and provider terms. Before release, check terms for actual use and implement the linked attribution/credits contract, including altitude-only results. Researching equations does not license copying source illustrations; the egg SVG and generated tones are original assets.
+
+For release distribution, inspect dependencies included in the actual bundle/artifact and collect required notices. Do not assume `npm audit` performs license compliance or that all `devDependencies` are absent from what ships. Add a NOTICE file when the adopted material requires it, not an empty ceremonial file.
+
+## MVP asset provenance — 2026-09-15
+
+| Asset                                        | Origin / modifications                                                                                        | License / attribution                                                            |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `src/ui/Egg.svelte`, CSS and miniature yolks | Original geometric SVG/CSS authored for this implementation; no source illustration copied                    | Repository Apache-2.0                                                            |
+| Web Audio cues                               | Original sine-tone sequence generated locally; no recording or sample                                         | Repository Apache-2.0                                                            |
+| Type                                         | Browser/system fonts; no font downloaded or bundled                                                           | Operating-system supplied                                                        |
+| `docs/assets/egg-cooker-configure.png`       | Screenshot generated from the application with standard synthetic conditions; no personal location displayed  | Repository Apache-2.0                                                            |
+| Environmental input data                     | Open-Meteo/Copernicus terrain and surface pressure; transformed locally into boiling temperature and duration | Provider data terms, CC BY 4.0; linked in About, including for altitude fallback |
+
+No new runtime dependency was added. Provider documentation/terms were checked on 2026-09-15; recheck intended-use eligibility and bundled dependency notices at publication.
+
+Optional locality labels use [BigDataCloud’s client-side reverse-geocoding service](https://www.bigdatacloud.com/free-api/free-reverse-geocode-to-city-api), credited in About. Reviewed 2026-09-16: no API key/package required, but only the calling device’s current permission-derived coordinates may be used. See the [fair-use policy](https://www.bigdatacloud.com/docs/article/fair-use-policy-for-free-client-side-reverse-geocoding-api) and [privacy policy](https://www.bigdatacloud.com/privacy-and-cookie-policy). It is separate from Open-Meteo/Copernicus CC BY data; do not imply one provider’s license applies to another. Recheck before publication.

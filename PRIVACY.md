@@ -1,0 +1,21 @@
+# Egg Cooker privacy
+
+**Updated: 2026-09-16.** Cooking calculations and the animated timer run in your browser. There are no accounts, analytics, application backend or cloud history.
+
+## This tab's active timer
+
+A real active cook is stored in `sessionStorage` under `egg-cooker.active-cook.v1` for best-effort same-tab reload recovery. The record contains model/schema versions, egg mass and starting temperature, selected doneness, pressure/source, optional selected/terrain elevation and weather model time, and the timer's start/target/save timestamps and duration. It does not contain coordinates, raw API responses, completed history or sound preferences. Demo cooks are not saved.
+
+Stop timer, Cook another egg, Back and Discard remove the active record. Corrupt/unknown records are never silently migrated. Storage may be denied or fail; the app shows a warning and continues in memory. Failed deletion can leave an older timer that reappears after reload. Other storage keys are untouched. Closing a tab normally ends session storage, but browser session restoration/duplicated-tab behavior is browser-controlled; durable deletion across browser backups is not promised.
+
+## Optional local conditions
+
+The app requests browser location on a **Use location / Refresh** tap, with coordinate-sharing and automatic-refresh details in About and an accessible description on the action. That action saves the boolean `egg-cooker.auto-location.v1` preference in `localStorage`. Later visible visits can request location once automatically when the preference is enabled and browser permission is already granted; otherwise they wait for a tap. About provides an off switch that removes the preference. No active real cook triggers a new lookup. Browser permission and its lifetime are controlled by the browser. Optional preference-storage failure does not prevent manual lookup. Latitude/longitude are rounded to three decimals, then sent directly over HTTPS to Open-Meteo's elevation/weather endpoints and BigDataCloud's client-side reverse-geocoding endpoint for an optional locality label. Requests also expose your IP address to the provider. No coordinates or raw responses are retained by the app after lookup, saved in storage, or logged by application code.
+
+Open-Meteo may log request coordinates/metadata and retain API logs for up to 90 days under its [terms and privacy policy](https://open-meteo.com/en/terms). These are external provider practices, checked on 2026-09-15; they may change. Data are credited to Open-Meteo/Copernicus in About. BigDataCloud receives the rounded coordinates and IP address and uses anonymous pairings to improve IP location; see its [privacy policy](https://www.bigdatacloud.com/privacy-and-cookie-policy) and [service explanation](https://www.bigdatacloud.com/docs/article/why-is-reverse-geocoding-api-free), reviewed 2026-09-16. The app holds only the optional city/locality text in memory and never saves it. It does not use an IP-derived location fallback. Lookups run on taps or once per eligible visit, never polled or triggered by sliders. The saved boolean contains no location and is retained until switched off or browser site data are cleared. Reset/cancel invalidates the lookup; it cannot retract a request the provider already received. Standard-pressure cooking remains available without permission or network success.
+
+## Hosting and development
+
+When hosted, the browser contacts the hosting provider to download the app. That provider may process request metadata under its own policy. All application images, fonts and sound use original local SVG/CSS, system fonts and generated tones; there are no remote asset downloads beyond the requested environment/locality APIs.
+
+Development/CI use package registries and browser downloads. npm audit submits dependency metadata to npm. Test traces/screenshots can contain displayed data; automated tests and the Open-Meteo live smoke use synthetic public coordinates. BigDataCloud is intercepted/blocked in these tests because its live endpoint permits only the calling device’s real location. Actual-device locality acceptance must avoid logs/screenshots containing private places. Do not publish private artifacts. See [security/privacy operations](docs/operations/security-privacy.md) and the [user guide](docs/user-guide.md).

@@ -1,0 +1,26 @@
+# Interaction, science visibility and sound polish — 2026-09-16
+
+**Scope:** The maintainer's latest hands-on feedback, refining [0004](../product/specifications/0004-continuous-controls.md) and the consolidated [living MVP](../product/specifications/0001-mvp.md). Local implementation authorized; no release/push was part of this historical verification slice. Prior uncommitted work was preserved.
+
+## Implemented
+
+- Native mass/texture rails center each preset above its thumb position. Mass remains 40–90 g, presets 50/60/70/80. Texture 0.75–2.25, same Soft/Jammy/Firm anchors; above Firm means Longer with clamped illustration. Temperature geometry/interaction untouched.
+- Start shows duration and water boiling temperature. Below 85 °C indicates exploratory texture; no invented impossible-doneness cutoff. Primary literature and provider policy review recorded in the science specification. Independent Python IAPWS/atmosphere calculation at 8850 m: 314.346538 hPa, 70.171726 °C. The first focused run exposed an incorrect 70.5 °C expectation; corrected to independently established 70.2 °C display.
+- Optional BigDataCloud city/locality runs independently of elevation/weather, guarded by request generation. No name/coordinate persistence, no IP fallback, no failure-induced condition changes. About holds sharing/credits; accessible description retained. Synthetic tests and the Open-Meteo live-smoke helper block real BigDataCloud requests to respect client-only coordinate policy.
+- Final ten countdown seconds tick once per second; demo ticks are rate-limited. Three-tone Ready alarm every two real seconds, without the old one-minute cap. Stop/mute/Back/finish and visibility/recovery boundaries remain.
+- Reconciled all session feedback in 0001, science, user/privacy docs and context. Project-scoped AGENTS/docs authority now explicitly require living MVP reconciliation with implementation; historical dated evidence stays unchanged.
+
+## Final verification
+
+- Root `npm run verify:all`: passed; 92 domain/adapter tests, 3 repository-script tests, 129 browser checks (43 scenarios × Chromium/Firefox/WebKit), 36.1 s browser phase. Log: `/tmp/egg-polish-root.log`. This precedes the final visible-space correction on Start.
+- Final artifact `BASE_PATH=/egg-cooker/ npm run verify:all`: **passed**, the same 92 + 3 + 129 checks, browser phase 35.7 s. Formatting, lint, Svelte/TypeScript, documentation links and production build passed. Log: `/tmp/egg-polish-subpath-final.log`. No skipped tests or retries.
+- Focused iteration initially passed 41/42 Chromium scenarios; corrected the independently verified Everest display expectation. Lint also caught the control-character regex and literal-space interpolation; both were rewritten without changing rules. Visual review caught the missing Start-label space; its new assertion now recognizes the deliberate nonbreaking space. Failed intermediate runs are not counted as passing evidence.
+- New regression coverage: geometric centers for every size/texture preset; boiling display/low-temperature note; Longer with clamped geometry; optional city timeout/failure isolation, manual cancellation and no persistence; final ten ticks, two-second alarms beyond one minute and Stop silence. An additional race test verifies a late city name cannot reapply expired weather. Existing fallback, recovery, keyboard, accessibility, motion, phone-fit and offline checks remain.
+- Rendered final production preview inspected in Chromium 153.0.8010.12: default 390 × 844, synthetic city at 390 × 740, Everest/Firm, Ready and stopped states. Preset/thumb centers align, time/temperature spacing is visible, source/name grouping and actions remain legible. Short-phone Start bottom: 706.5 CSS px. Low-temperature note remains below the button; small/error/zoom cases may scroll as specified.
+- Ignored local artifacts: `.local/polish-review/default.png`, `local.png`, `short-phone.png`, `everest.png`, `ready.png`, `stopped.png`, `layout.json`, `review.mjs`, `build-manifest.txt`. Synthetic place data only. Manifest SHA-256: `2584296f3564a694f6921e47c7f3c3a5875a3401dd8d403f0f7f7f05bf01c89b`. This was a working-tree artifact before the sanitized public baseline, not a released build.
+- Live Open-Meteo smoke on the final presentation build: 2026-09-16T04:21:07.449Z, public synthetic Berlin coordinates, Chromium 153, preview `/egg-cooker/`; Local 1005 hPa, default Soft ≈ 4:54; fresh elevation/weather, remembered granted refresh, weather snapshot and no stored coordinates all passed. `/tmp/egg-polish-live-final.json`. BigDataCloud was explicitly blocked; this does not prove live locality access. The subsequent gate rebuild produced the same application artifact manifest.
+- Final documentation-only handoff changes: formatting, local links and `git diff --check` checked separately. Preview serves the final subpath build; no remote mutation or release.
+
+## Remaining acceptance
+
+Human touch/appearance/audio acceptance, actual-device Safari permissions and suspended execution, live locality with the calling device's real consented location, deployed-origin checks, and kitchen validation remain Pending. Fixture tests do not establish a live locality result or audibility. No real user coordinates were requested for verification; no provider credentials, dependencies, or hosting changes.
