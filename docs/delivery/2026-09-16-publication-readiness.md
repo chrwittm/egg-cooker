@@ -1,0 +1,42 @@
+# Experimental 0.1.0 publication readiness
+
+**Status:** Local source candidate ready; push, tag, release workflows and deployment not performed.
+**Scope:** First public source publication and GitHub Pages preparation for the accepted quick-cook MVP.
+
+## Source and history
+
+- The public branch is based on GitHub's existing license commit and adds sanitized source baseline `a5235f4` (`Publish experimental Egg Cooker MVP`).
+- The baseline uses the repository-scoped GitHub noreply identity. The former private development lineage and complete pre-publication working state are retained only in ignored `.local/pre-public-history-2026-09-16.bundle`.
+- Current files and the proposed public branch were scanned for real household names, personal email addresses, private paths, secret-like values and tracked local/build artifacts. No such publishable data was found. Public methodology now requires role labels or clearly synthetic examples and full-history review before publication.
+- The repository-specific project generator, template provenance and related tests were removed. Reusable-tooling extraction remains a separate future initiative, not an Egg Cooker product capability.
+
+## Public presentation and release posture
+
+- README, package/project metadata, privacy, security, licensing, changelog, product context, status and specification ledger now describe the actual repository and expected Pages URL.
+- The current interaction and presentation are accepted as the MVP. Version 0.1.0 is explicitly experimental: cooking estimates are not kitchen-calibrated and broader actual-device evidence is not claimed.
+- Kitchen calibration is [TECH-001](../planning/backlog.md); broader device/audio/accessibility/background evidence is [TECH-002](../planning/backlog.md). New behavior belongs in additional feature work.
+- A synthetic standard-conditions screenshot is committed and its provenance recorded. No personal place or location result appears in it.
+- Open-Meteo non-commercial/educational terms and BigDataCloud client-side fair-use requirements were rechecked on 2026-09-16; the current consented browser-only integrations remain within the documented intended use.
+
+## Automation update
+
+The Pages workflow still pins actions by immutable commit SHA. `actions/upload-pages-artifact` was updated from generation 3 to the exact generation-4 commit documented for custom Pages workflows: `7b1f4a764d45c48632c6b24a0339c27f5614fb0b`. This preserves supply-chain pinning while moving to the supported action interface; it is not a floating `@v4` reference.
+
+## Verification
+
+Run on macOS/Darwin arm64 with Node 24.20.0 and npm 11.19.0:
+
+```sh
+BASE_PATH=/egg-cooker/ npm run verify:all
+npm run audit:all
+```
+
+Result on 2026-09-16: formatting, lint, Svelte/TypeScript checks, local documentation links and production build passed; 92 domain/adapter tests, 1 release-script test and 132 Playwright checks across Chromium, Firefox and WebKit passed. The complete dependency audit reported zero vulnerabilities.
+
+## External steps after the checkpoint
+
+1. Confirm repository metadata, private vulnerability reporting, dependency security settings and GitHub Actions as the Pages source.
+2. Push local `main`; verify the `Verify / verify` workflow before adding branch protection that requires it.
+3. Create annotated `v0.1.0`, run `npm run release:check -- v0.1.0`, push the tag and run **Release candidate**.
+4. Inspect the candidate artifact/checksum, mark the GitHub release as a prerelease, then dispatch **Deploy Pages** for `v0.1.0`.
+5. Smoke-test the live URL, asset/reload behavior, `/egg-cooker/build-info.json`, consented location and denied/offline fallbacks. Record the tag, commit, workflow runs and hosted URL without overstating kitchen or device evidence.
