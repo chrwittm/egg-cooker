@@ -22,7 +22,8 @@ body {
   margin: 0;
 }
 button,
-input {
+input,
+select {
   font: inherit;
 }
 button {
@@ -34,6 +35,8 @@ button {
   border-radius: 12px;
   padding: 9px 16px;
   font-weight: 600;
+  hyphens: auto;
+  overflow-wrap: break-word;
 }
 button:hover {
   background: #eee6d6;
@@ -44,6 +47,7 @@ button:disabled {
 }
 button:focus-visible,
 input:focus-visible,
+select:focus-visible,
 a:focus-visible,
 summary:focus-visible {
   outline: 3px solid #865200;
@@ -129,6 +133,7 @@ header {
 .overflow label {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 10px;
   min-height: 44px;
 }
@@ -136,6 +141,28 @@ header {
   accent-color: #79500d;
   width: 20px;
   height: 20px;
+}
+.language-choice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.language-choice select {
+  min-height: 44px;
+  color: inherit;
+  background: #fcf9f0;
+  border: 1px solid #8a7c66;
+  border-radius: 10px;
+  padding: 8px 34px 8px 10px;
+}
+.dialog-language {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid #c9bea9;
 }
 .journey {
   position: relative;
@@ -163,6 +190,11 @@ main:not(.active) .timer-panel {
   margin-bottom: 5px;
   font-size: 0.8125rem;
   font-weight: 650;
+}
+.control-title label,
+.location-title {
+  hyphens: auto;
+  overflow-wrap: break-word;
 }
 .control-title output {
   font-size: 1.25rem;
@@ -557,7 +589,8 @@ input[type='range']::-moz-range-thumb {
   margin: 0;
 }
 .environment {
-  background: #eee9dd;
+  background: #f1ecdf;
+  border: 1px solid #c9bea9;
   border-radius: 16px;
   padding: 0 12px 10px;
   margin-top: 16px;
@@ -572,6 +605,7 @@ input[type='range']::-moz-range-thumb {
   font-weight: 650;
   color: #6d604b;
   margin-bottom: 2px;
+  flex-wrap: wrap;
 }
 .location-button {
   display: flex;
@@ -675,7 +709,8 @@ input[type='range']::-moz-range-thumb {
   white-space: nowrap;
 }
 .location-button {
-  flex-shrink: 0;
+  flex-shrink: 1;
+  flex-wrap: wrap;
 }
 .start {
   flex-direction: column;

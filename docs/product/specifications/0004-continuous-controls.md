@@ -29,6 +29,8 @@ The maintainer requested centered preset anchors, visible boiling temperature, a
 
 Start shows time and water boiling temperature; below 85 °C an exploratory-texture note appears. The threshold is a product caution based on protein complexity, not an exact doneness cutoff. BigDataCloud supplies an optional independently fetched locality with the existing request bounds/cancellation guard; About holds its data-sharing/credits. No coordinate/name persistence. Final ten seconds tick; Ready repeats a three-tone alarm every two real seconds until acknowledged or muted. Existing hidden-page and recovery limits remain.
 
+[0005](0005-release-polish.md) later replaces only that Ready melody/repeat detail with the bundled rooster call and synthesized fallback; activation, ticks and foreground-only platform limits remain.
+
 ## Accepted fine-tuning — 2026-09-16
 
 Texture highlighting covers the entire continuous range using the nearest anchor: Soft below 1.25, Jammy from 1.25 to below 1.75, Firm from 1.75 through 2.25. Midpoints select the higher category. The separate “Longer” output is removed; timing, anchor positions and illustration limits stay unchanged. Configuration, cooking summaries and accessible category names use these same three labels.

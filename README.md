@@ -13,7 +13,8 @@ A browser-based, science-informed egg timer with pressure-adjusted estimates, co
 - Calculates an estimated cooking time from egg mass, starting temperature, desired texture and local air pressure.
 - Offers Soft, Jammy and Firm anchors with continuous adjustment between and beyond them.
 - Optionally requests the device's location to obtain elevation and current surface pressure, with explicit fallbacks and privacy disclosure.
-- Runs the timer, animation and generated audio entirely in the browser.
+- Runs the timer, animation and bundled Ready sound entirely in the browser, with synthesized cues and fallback.
+- Presents the complete interface in English or German and includes an original egg Home Screen/browser icon.
 - Recovers a validated active timer after a same-tab reload when browser storage is available.
 - Includes a clearly marked accelerated demo mode for testing and teaching.
 
@@ -74,4 +75,4 @@ Cooking times are model-based estimates. Soft and Jammy eggs are not fully cooke
 
 ## License
 
-Source code is available under [Apache License 2.0](LICENSE). External environmental data and services retain their own terms and attribution; see [licensing](docs/operations/licensing.md).
+Source code is available under [Apache License 2.0](LICENSE). External environmental data, services and the public-domain rooster recording retain their documented provenance; see [licensing](docs/operations/licensing.md) and [sound credits](SOUND_CREDITS.md).

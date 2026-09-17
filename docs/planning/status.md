@@ -1,8 +1,8 @@
 # Current work
 
-**State:** Experimental 0.1.0 prerelease and GitHub Pages deployment published and smoke-tested.
-**Active item:** Observe the accepted [living MVP](../product/specifications/0001-mvp.md) in personal use; treat further behavior as additional feature work.
-**Next action:** Record kitchen observations under [TECH-001](backlog.md) without treating anecdotal results as completed calibration; triage the automated dependency-update pull requests separately.
+**State:** FEAT-007 implementation, automated verification and actual-iPhone acceptance complete; v0.1.1 release preparation authorized.
+**Active item:** [FEAT-007](../product/specifications/0005-release-polish.md), the bounded v0.1.1 language, identity and alarm-polish slice.
+**Next action:** Prepare, verify and publish the authorized v0.1.1 candidate, then deploy and smoke-test the tagged Pages build. Kitchen observations remain separate under [TECH-001](backlog.md).
 
 ## Handoff
 
@@ -20,3 +20,5 @@
 - Workflow maintenance: GitHub successfully forced the pinned Pages and artifact actions from their deprecated Node 20 runtime onto Node 24, but the warnings should be removed in a future maintenance change by reviewing and pinning supported action revisions. Do not move the published tag.
 - Backlog validation: kitchen calibration ([TECH-001](backlog.md)) and broader actual-device evidence ([TECH-002](backlog.md)); limitations remain disclosed in the app and public docs.
 - Deferred features: Guided (0002), calibration/feedback behavior, history, broader preferences, PWA and other non-goals.
+- v0.1.1 decision: consistent Location data surface, complete English/German UI, the Bold egg Home Screen icon and warm short-rooster candidate B were accepted as the next bounded slice. Foreground iPhone retesting succeeded, so no silent-audio defect was recorded. Background/locked alarms, Live Activities and Siri remain postponed platform work. [0005](../product/specifications/0005-release-polish.md) had no remaining product questions before implementation.
+- v0.1.1 implementation: the typed English/German catalog and explicit preference, locale-aware lookup/date presentation, matching Location data surface, bundled Bold egg icon/manifest set and accepted 3.4-second rooster derivative are implemented. `BASE_PATH=/egg-cooker/ npm run verify:all` passed with 96 unit/integration tests, 1 script test and 150 browser checks. [Evidence](../delivery/2026-09-17-release-polish-verification.md). The maintainer accepted foreground Safari and a newly added Home Screen item on an iPhone 16 Pro with iOS 26.6.2 after the icon artwork was shifted slightly downward; activation, Ready playback and the accepted icon passed. No v0.1.1 version/tag/release has yet been prepared.

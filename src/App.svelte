@@ -9,7 +9,6 @@
     calculate,
     category,
     textureValue,
-    textureName,
     textureCategory,
     formatTime,
     freshWeather,
@@ -30,6 +29,28 @@
     ReminderWindow,
     CountdownTicks,
   } from './infrastructure/sound';
+  import {
+    illustrationLabel,
+    readLocale,
+    textureLabel,
+    translate,
+    writeLocale,
+  } from './i18n';
+  import type { Locale, MessageKey } from './i18n';
+
+  function initialLocale(): Locale {
+    let preference: Storage | undefined;
+    try {
+      preference = localStorage;
+    } catch {
+      /* The requested browser languages remain available. */
+    }
+    return readLocale(preference, navigator.languages);
+  }
+
+  let locale = $state<Locale>(initialLocale());
+  const t = (key: MessageKey, values: Record<string, string | number> = {}) =>
+    translate(locale, key, values);
 
   let massG = $state(60);
   let initialTemperatureC = $state(8);
@@ -55,10 +76,10 @@
   let place = $state('');
   let overflow = $state(false);
   let soundOn = $state(true);
-  let soundError = $state('');
+  let soundError = $state(false);
   let storageWarning = $state('');
-  let notice = $state('');
-  let completion = $state('');
+  let notice = $state<MessageKey | ''>('');
+  let completion = $state<MessageKey | ''>('');
   let recoveryIssue = $state<'corrupt' | 'old' | null>(null);
   let modal = $state<'recovery' | 'corrupt' | 'old' | 'info' | null>(null);
   let dialog: HTMLDialogElement;
@@ -92,13 +113,75 @@
   const shownConditions = $derived(cook ?? conditions);
   const conditionsLabel = $derived(
     shownConditions.source === 'weather'
-      ? `Local · ${Math.round(shownConditions.pressureHpa)} hPa`
+      ? t('localPressure', {
+          pressure: Math.round(shownConditions.pressureHpa),
+        })
       : shownConditions.source === 'altitude'
-        ? 'Altitude estimate'
+        ? t('altitudeEstimate')
         : shownConditions.source === 'manual'
-          ? 'Adjusted pressure'
-          : 'Standard · 1013 hPa',
+          ? t('adjustedPressure')
+          : t('standardPressure'),
   );
+  const conditionErrorKey = $derived.by<MessageKey | null>(() => {
+    const keys: Record<string, MessageKey> = {
+      'Weather unavailable': 'weatherUnavailable',
+      'Elevation unavailable': 'elevationUnavailable',
+      'Location imprecise': 'locationImprecise',
+      'Location unavailable': 'locationUnavailable',
+      'Weather expired': 'weatherExpired',
+    };
+    return keys[conditionsError] ?? null;
+  });
+  const storageWarningKey = $derived.by<MessageKey | null>(() => {
+    if (storageWarning.includes('older timer')) return 'recoveryUnavailableOld';
+    if (storageWarning) return 'recoveryUnavailable';
+    return null;
+  });
+  const localizedTexture = (value: Doneness | number) =>
+    textureLabel(locale, textureCategory(value));
+  const formatDecimal = (value: number) =>
+    new Intl.NumberFormat(locale, {
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1,
+    }).format(value);
+  const conditionDetails = $derived.by(() => {
+    const values = {
+      source: conditionsLabel,
+      altitude: Math.round(shownConditions.altitudeM ?? 0),
+      date: shownConditions.weatherTimeSeconds
+        ? new Intl.DateTimeFormat(locale, {
+            dateStyle: 'medium',
+            timeStyle: 'short',
+          }).format(new Date(shownConditions.weatherTimeSeconds * 1000))
+        : '',
+    };
+    if (shownConditions.weatherTimeSeconds)
+      return t(
+        shownConditions.altitudeM === null
+          ? 'conditionsWeatherNoAltitude'
+          : 'conditionsWeather',
+        values,
+      );
+    if (shownConditions.altitudeM !== null)
+      return t('conditionsAltitude', values);
+    return t('conditionsPressure', values);
+  });
+
+  function chooseLocale(value: Locale) {
+    locale = value;
+    try {
+      writeLocale(localStorage, value);
+    } catch {
+      /* The current page still uses the selection. */
+    }
+  }
+
+  $effect(() => {
+    document.documentElement.lang = locale;
+    document
+      .querySelector('meta[name="description"]')
+      ?.setAttribute('content', t('documentDescription'));
+  });
 
   let eggElement: HTMLDivElement;
   let eggAnimation: Animation | undefined;
@@ -169,7 +252,7 @@
     ) {
       conditions = altitudeConditions(conditions.altitudeM!);
       conditionsError = 'Weather expired';
-      notice = 'Conditions updated';
+      notice = 'conditionsUpdated';
       return true;
     }
     return false;
@@ -195,7 +278,7 @@
     if (lookupPending) return;
     locationRevision++;
     rememberLocation(true);
-    void lookup.start();
+    void lookup.start(locale);
   }
   async function refreshPermittedLocation() {
     const revision = locationRevision;
@@ -211,7 +294,7 @@
         !document.hidden &&
         autoLocation
       )
-        void lookup.start();
+        void lookup.start(locale);
     } catch {
       /* Unsupported permission query: keep the one-tap action. */
     }
@@ -222,7 +305,7 @@
     sound.stop();
     storageWarning = storage.remove();
     closeModal();
-    notice = 'Time uncertain';
+    notice = 'timeUncertain';
     void focusHeading();
   }
   function update(realNow: number) {
@@ -248,7 +331,7 @@
     activeFrame = illustration(next.elapsedMs / 1000, runTimes, reducedMotion);
     if (reached) {
       if (modal) closeModal();
-      completion = 'Cooking time reached. Take the egg out.';
+      completion = 'cookingTimeReached';
       if (!modal) void focusHeading();
     }
     if (
@@ -261,7 +344,6 @@
     )
       sound.tick();
     if (reminder.due(realNow, !document.hidden, next.alert, soundOn)) {
-      sound.stop();
       sound.play();
     }
   }
@@ -289,7 +371,7 @@
         now,
       );
     } catch {
-      notice = validTime(now) ? 'Estimate unavailable' : 'Time uncertain';
+      notice = validTime(now) ? 'estimateUnavailable' : 'timeUncertain';
       return;
     }
     // Commit before storage, sound, cancellation or visual effects.
@@ -306,7 +388,7 @@
     reminder = new ReminderWindow();
     countdownTicks = new CountdownTicks();
     completion = '';
-    notice = demo ? 'Demo started' : 'Cooking started';
+    notice = demo ? 'demoStarted' : 'cookingStarted';
     stopLookup();
     overflow = false;
     if (!demo) storageWarning = storage.save(cook);
@@ -330,9 +412,7 @@
     uncertain = false;
     rate = 1;
     completion = '';
-    notice = wasEarly
-      ? 'Cooking timer ended. Remove the egg from the heat.'
-      : '';
+    notice = wasEarly ? 'timerEnded' : '';
     void moveEgg(previousEgg);
     expireConditions(Date.now());
     void focusHeading();
@@ -345,7 +425,7 @@
     cancelAnimationFrame(animationId);
     reminder = new ReminderWindow(true);
     if (!demo) storageWarning = storage.remove();
-    completion = 'Timer stopped. Egg taken out.';
+    completion = 'timerStopped';
     void focusHeading();
   }
   function changeRate(value: 1 | 10 | 20 | 50) {
@@ -371,8 +451,9 @@
       sound.stop();
     } else {
       soundOn = true;
-      soundError = '';
-      void sound.enable();
+      soundError = false;
+      reminder = new ReminderWindow();
+      void sound.enable(Boolean(current?.alert));
     }
   }
   function save() {
@@ -430,7 +511,7 @@
       if (recovery.kind === 'uncertain') timeUncertain();
       else {
         resumeRendering();
-        notice = 'Timer recovered';
+        notice = 'timerRecovered';
         void openModal('recovery');
       }
     } else {
@@ -450,13 +531,13 @@
     recoveryIssue = null;
     storageWarning = storage.remove();
     closeModal();
-    notice = 'Timer discarded';
+    notice = 'timerDiscarded';
     void focusHeading();
   }
   onMount(() => {
     sound = new CookSound(() => {
       soundOn = false;
-      soundError = 'Sound unavailable';
+      soundError = true;
     });
     lookup = new EnvironmentLookup(
       (update) => {
@@ -556,18 +637,13 @@
   });
 </script>
 
-<svelte:head
-  ><title>Egg Cooker</title><meta
-    name="description"
-    content="Set your egg. Watch it cook. A simple, science-informed egg timer."
-  /></svelte:head
->
+<svelte:head><title>{t('documentTitle')}</title></svelte:head>
 
 <main class:active={cook !== null}>
   <header>
     {#if cook}<button
         class="icon back"
-        aria-label="Back"
+        aria-label={t('back')}
         onclick={() => finish()}
         ><svg viewBox="0 0 24 24" aria-hidden="true"
           ><path d="m14 6-6 6 6 6" /></svg
@@ -576,10 +652,12 @@
         >egg cooker<span class="brand-dot">.</span></span
       >{/if}
     <div class="utilities">
-      {#if demo}<span class="demo-badge">DEMO · {rate}×</span>{/if}
+      {#if demo}<span class="demo-badge"
+          >{t('demo').toLocaleUpperCase(locale)} · {rate}×</span
+        >{/if}
       <button
         class="icon"
-        aria-label={soundOn ? 'Mute sound' : 'Enable and test sound'}
+        aria-label={soundOn ? t('muteSound') : t('enableSound')}
         aria-pressed={soundOn}
         aria-describedby="sound-help"
         onclick={toggleSound}
@@ -592,47 +670,61 @@
       </button>
       <button
         class="icon info"
-        aria-label="About this timer"
+        aria-label={t('about')}
         onclick={(event) => openModal('info', event.currentTarget)}
         ><svg viewBox="0 0 24 24" aria-hidden="true"
           ><circle cx="12" cy="12" r="9" /><path d="M12 11v6m0-10v.5" /></svg
         ></button
       >
-      {#if !cook}<button
-          class="icon"
-          aria-label="Options"
-          aria-expanded={overflow}
-          onclick={() => (overflow = !overflow)}
-          ><svg viewBox="0 0 24 24" aria-hidden="true"
-            ><circle cx="5" cy="12" r="1" /><circle
-              cx="12"
-              cy="12"
-              r="1"
-            /><circle cx="19" cy="12" r="1" /></svg
-          ></button
-        >{/if}
+      <button
+        class="icon"
+        aria-label={t('options')}
+        aria-expanded={overflow}
+        onclick={() => (overflow = !overflow)}
+        ><svg viewBox="0 0 24 24" aria-hidden="true"
+          ><circle cx="5" cy="12" r="1" /><circle
+            cx="12"
+            cy="12"
+            r="1"
+          /><circle cx="19" cy="12" r="1" /></svg
+        ></button
+      >
     </div>
   </header>
-  {#if overflow && !cook}<div class="overflow">
-      <label
-        ><input type="checkbox" bind:checked={demo} /> Demo
-        <span class="muted">Testing mode</span></label
-      >
+  {#if overflow}<div class="overflow">
+      {#if !cook}<label
+          ><input type="checkbox" bind:checked={demo} />
+          {t('demo')}
+          <span class="muted">{t('testingMode')}</span></label
+        >{/if}
+      <label class="language-choice">
+        <span>{t('language')}</span>
+        <select
+          value={locale}
+          onchange={(event) =>
+            chooseLocale(event.currentTarget.value as Locale)}
+        >
+          <option value="en">{t('english')}</option>
+          <option value="de">{t('german')}</option>
+        </select>
+      </label>
     </div>{/if}
   <p id="sound-help" class="sr-only">
-    Keep this page visible and your device awake for the best chance of hearing
-    the alarm. Suspended alarms are not guaranteed.
+    {t('soundHelp')}
   </p>
-  {#if soundError}<p class="feedback" role="status">{soundError}</p>{/if}
+  {#if soundError}<p class="feedback" role="status">
+      {t('soundUnavailable')}
+    </p>{/if}
   {#if storageWarning}<details class="feedback">
-      <summary>{storageWarning}</summary>Same-tab recovery is unavailable. Keep
-      this page open; reloading may lose this timer.
+      <summary>{storageWarningKey ? t(storageWarningKey) : ''}</summary>{t(
+        'recoveryHelp',
+      )}
     </details>{/if}
 
   {#if recoveryIssue && !modal}
     <div class="feedback">
-      <p>{recoveryIssue === 'old' ? 'Old timer' : 'Cannot recover timer'}</p>
-      <button onclick={discard}>Discard</button>
+      <p>{recoveryIssue === 'old' ? t('oldTimer') : t('cannotRecover')}</p>
+      <button onclick={discard}>{t('discard')}</button>
     </div>
   {/if}
   <div class="journey">
@@ -649,11 +741,11 @@
         }}
       >
         <h1 class="sr-only" bind:this={heading} tabindex="-1">
-          Configure your egg
+          {t('configureHeading')}
         </h1>
         <div class="control-block">
           <div class="control-title">
-            <label for="mass">Egg size</label><output for="mass"
+            <label for="mass">{t('eggSize')}</label><output for="mass"
               >{massG} <small>g</small></output
             >
           </div>
@@ -661,7 +753,10 @@
             <div class="presets sizes">
               {#each [['S', 50], ['M', 60], ['L', 70], ['XL', 80]] as [name, grams] (name)}
                 <button
-                  aria-label={`${name} · ${grams} grams`}
+                  aria-label={t('sizePreset', {
+                    name: String(name),
+                    grams: Number(grams),
+                  })}
                   aria-pressed={category(massG) === name}
                   onclick={() => (massG = Number(grams))}>{name}</button
                 >
@@ -674,13 +769,16 @@
               max="90"
               step="1"
               bind:value={massG}
-              aria-valuetext={`${category(massG)}, ${massG} grams`}
+              aria-valuetext={t('sizeValue', {
+                name: category(massG),
+                grams: massG,
+              })}
             />
           </div>
         </div>
         <div class="control-block">
           <div class="control-title">
-            <label for="temperature">Starting temperature</label><output
+            <label for="temperature">{t('startingTemperature')}</label><output
               for="temperature">{initialTemperatureC}<small> °C</small></output
             >
           </div>
@@ -689,12 +787,12 @@
               <button
                 aria-pressed={initialTemperatureC >= 4 &&
                   initialTemperatureC <= 8}
-                onclick={() => (initialTemperatureC = 8)}>Fridge</button
+                onclick={() => (initialTemperatureC = 8)}>{t('fridge')}</button
               >
               <button
                 aria-pressed={initialTemperatureC >= 20 &&
                   initialTemperatureC <= 24}
-                onclick={() => (initialTemperatureC = 20)}>Room</button
+                onclick={() => (initialTemperatureC = 20)}>{t('room')}</button
               >
             </div>
             <input
@@ -704,13 +802,15 @@
               max="30"
               step="1"
               bind:value={initialTemperatureC}
-              aria-valuetext={`${initialTemperatureC} degrees Celsius`}
+              aria-valuetext={t('temperatureValue', {
+                temperature: initialTemperatureC,
+              })}
             />
           </div>
         </div>
         <div class="control-block doneness">
           <div class="control-title">
-            <label for="texture">How would you like your egg?</label>
+            <label for="texture">{t('textureQuestion')}</label>
           </div>
           <div class="preset-rail">
             <div class="presets yolk-options">
@@ -718,7 +818,7 @@
                 <button
                   aria-pressed={textureCategory(doneness) === choice}
                   onclick={() => (doneness = choice as Doneness)}
-                  >{textureName(choice as Doneness)}</button
+                  >{localizedTexture(choice as Doneness)}</button
                 >
               {/each}
             </div>
@@ -729,20 +829,17 @@
               max="2.25"
               step="0.01"
               value={textureValue(doneness)}
-              aria-valuetext={textureName(doneness)}
+              aria-valuetext={localizedTexture(doneness)}
               oninput={(event) =>
                 (doneness = Number(event.currentTarget.value))}
             />
           </div>
         </div>
         <div class="environment">
-          <span id="location-summary" class="sr-only"
-            >Uses Open-Meteo and BigDataCloud; remembers automatic refresh.
-            Details in About this timer.</span
-          >
+          <span id="location-summary" class="sr-only">{t('locationHelp')}</span>
           <div class="environment-heading">
             <div class="location-summary">
-              <h2 class="location-title">Location data</h2>
+              <h2 class="location-title">{t('locationData')}</h2>
               <span class="conditions-label"
                 >{#if place}<span class="place" title={place}>{place}</span>
                   <span class="place-pressure"
@@ -753,7 +850,9 @@
             </div>
             <button
               class="location-button"
-              aria-label={autoLocation ? 'Refresh location' : 'Use location'}
+              aria-label={autoLocation
+                ? t('refreshLocation')
+                : t('useLocation')}
               aria-describedby="location-summary"
               aria-disabled={lookupPending}
               onclick={locate}
@@ -764,14 +863,15 @@
                 /></svg
               >
               {lookupProgress
-                ? 'Locating…'
+                ? t('locating')
                 : autoLocation
-                  ? 'Refresh'
-                  : 'Use location'}
+                  ? t('refresh')
+                  : t('useLocation')}
             </button>
           </div>
           <div class="control-title">
-            <label for="elevation">Elevation</label><output for="elevation"
+            <label for="elevation">{t('elevation')}</label><output
+              for="elevation"
               >{Math.round(conditions.altitudeM ?? 0)} <small>m</small></output
             >
           </div>
@@ -786,7 +886,8 @@
           />
 
           <div class="control-title pressure-title">
-            <label for="pressure">Air pressure</label><output for="pressure"
+            <label for="pressure">{t('airPressure')}</label><output
+              for="pressure"
               >{Math.round(conditions.pressureHpa)} <small>hPa</small></output
             >
           </div>
@@ -800,16 +901,17 @@
             oninput={(event) => setPressure(Number(event.currentTarget.value))}
           />
           {#if lookupProgress}<div class="location-row">
-              <p class="muted" role="status">Finding local conditions…</p>
+              <p class="muted" role="status">{t('findingConditions')}</p>
               <button class="text-button" onclick={stopLookup}
-                >Cancel lookup</button
+                >{t('cancelLookup')}</button
               >
             </div>{/if}
           {#if conditionsError}<div class="condition-error" role="status">
-              <span>{conditionsError}</span><button
+              <span>{conditionErrorKey ? t(conditionErrorKey) : ''}</span
+              ><button
                 class="text-button"
                 disabled={lookupPending}
-                onclick={locate}>Retry</button
+                onclick={locate}>{t('retry')}</button
               >
             </div>{/if}
         </div>
@@ -833,18 +935,20 @@
           class="cook-heading"
         >
           {uncertain
-            ? 'Time uncertain'
+            ? t('timeUncertain')
             : stopped
-              ? 'Egg taken out'
+              ? t('eggTakenOut')
               : current?.alert
-                ? 'Ready'
-                : 'Cooking'}
+                ? t('ready')
+                : t('cooking')}
         </h1>
         {#if !uncertain && current}<div
             class:overdue={current.alert}
             class="countdown"
             aria-live="off"
-            aria-label={current.alert ? 'Time past target' : 'Time remaining'}
+            aria-label={current.alert
+              ? t('timePastTarget')
+              : t('timeRemaining')}
           >
             {current.alert ? '+' : ''}{formatTime(
               current.alert ? current.overdueSeconds : current.remainingSeconds,
@@ -853,11 +957,10 @@
         <p class="cook-summary">
           {cook.massG} g <span>·</span>
           {cook.initialTemperatureC} °C <span>·</span>
-          {textureName(cook.doneness)}
+          {localizedTexture(cook.doneness)}
         </p>
         {#if uncertain}<p>
-            The device clock moved backwards or became invalid. Check the egg
-            and cancel this timer.
+            {t('uncertainHelp')}
           </p>{/if}
       </section>
     {/if}
@@ -868,32 +971,35 @@
       bind:this={eggElement}
       style:width={eggWidth}
     >
-      <Egg frame={cook ? activeFrame : preview} />
+      <Egg
+        frame={cook ? activeFrame : preview}
+        label={illustrationLabel(locale, cook ? activeFrame : preview)}
+      />
     </div>
     {#if cook}
       {#if demo && !uncertain && !stopped}<div class="demo-section">
-          <span class="muted">Demo speed</span>
-          <div class="presets demo-controls" aria-label="Demo controls">
+          <span class="muted">{t('demoSpeed')}</span>
+          <div class="presets demo-controls" aria-label={t('demoControls')}>
             {#each [1, 10, 20, 50] as speed (speed)}<button
                 aria-pressed={rate === speed}
                 onclick={() => changeRate(speed as 1 | 10 | 20 | 50)}
                 >{speed}×</button
               >{/each}
-            <button onclick={toEnd}>To end</button>
+            <button onclick={toEnd}>{t('toEnd')}</button>
           </div>
         </div>{/if}
       {#if uncertain}<button class="primary" onclick={() => finish()}
-          >Cancel cooking</button
+          >{t('cancelCooking')}</button
         >
       {:else if current?.alert}
         {#if !stopped}<button class="stop-timer" onclick={stopTimer}
-            >Stop timer</button
+            >{t('stopTimer')}</button
           >{/if}
         <button
           class="primary done"
           onclick={(event) => {
             if (event.detail <= 1) finish();
-          }}>Cook another egg</button
+          }}>{t('cookAnother')}</button
         >{/if}
     {:else}
       <button
@@ -902,39 +1008,41 @@
         onclick={start}
         aria-describedby="start-help"
       >
-        <span>{demo ? 'Start demo' : 'Start'}</span>
+        <span>{demo ? t('startDemo') : t('start')}</span>
         <span class="start-details"
           ><span
             class="estimate"
             aria-label={plan
-              ? `Estimated cooking time ${formatTime(plan.durationSeconds)}`
-              : 'Estimate unavailable'}
+              ? t('estimatedTime', { time: formatTime(plan.durationSeconds) })
+              : t('estimateUnavailable')}
             >{plan
-              ? `≈ ${formatTime(plan.durationSeconds)}`
-              : 'Estimate unavailable'}</span
-          >&nbsp;{#if plan}<span aria-label="Water boiling temperature">
-              at {plan.boilingC.toFixed(1)} °C</span
+              ? t('estimatedTimeShort', {
+                  time: formatTime(plan.durationSeconds),
+                })
+              : t('estimateUnavailable')}</span
+          >&nbsp;{#if plan}<span aria-label={t('boilingTemperature')}>
+              {t('boilingAt', {
+                temperature: formatDecimal(plan.boilingC),
+              })}</span
             >{/if}</span
         >
       </button>
       {#if plan && plan.boilingC < 85}<p class="low-boil">
-          Low boiling temperature · texture estimate is exploratory.
+          {t('lowBoil')}
         </p>{/if}
-      <span id="start-help" class="sr-only"
-        >Start when the egg is already in boiling water or saturated steam.</span
-      >
+      <span id="start-help" class="sr-only">{t('startHelp')}</span>
     {/if}
   </div>
   <p
-    class:sr-only={notice !== 'Conditions updated' &&
-      notice !== 'Estimate unavailable' &&
-      notice !== 'Time uncertain'}
+    class:sr-only={notice !== 'conditionsUpdated' &&
+      notice !== 'estimateUnavailable' &&
+      notice !== 'timeUncertain'}
     class="notice"
     role="status"
   >
-    {notice}
+    {notice ? t(notice) : ''}
   </p>
-  <p class="sr-only" role="alert">{completion}</p>
+  <p class="sr-only" role="alert">{completion ? t(completion) : ''}</p>
 </main>
 
 <dialog
@@ -947,7 +1055,7 @@
     if (event.key !== 'Tab') return;
     const controls = Array.from(
       dialog.querySelectorAll<HTMLElement>(
-        "button:not(:disabled), a[href], input, [tabindex='0']",
+        "button:not(:disabled), a[href], input, select, [tabindex='0']",
       ),
     );
     const first = controls[0];
@@ -963,96 +1071,60 @@
   aria-labelledby="dialog-title"
 >
   {#if modal === 'recovery'}<h2 id="dialog-title">
-      Recovered · Still cooking?
+      {t('recoveredTitle')}
     </h2>
-    <p>Your timer continues. Sound is off until you enable it.</p>
+    <p>{t('recoveredHelp')}</p>
     <div class="dialog-actions">
       <button
         onclick={() => {
           closeModal();
           void focusHeading();
-        }}>Yes</button
-      ><button onclick={() => finish()}>Done</button>
+        }}>{t('yes')}</button
+      ><button onclick={() => finish()}>{t('done')}</button>
     </div>
   {:else if modal === 'corrupt' || modal === 'old'}<h2 id="dialog-title">
-      {modal === 'old' ? 'Old timer' : 'Cannot recover timer'}
+      {modal === 'old' ? t('oldTimer') : t('cannotRecover')}
     </h2>
     <p>
-      {modal === 'old'
-        ? 'This timer is at least 24 hours old.'
-        : 'The saved timer is invalid or uses an unknown model.'}
+      {modal === 'old' ? t('oldTimerHelp') : t('corruptTimerHelp')}
     </p>
-    <button onclick={discard}>Discard</button>
-  {:else if modal === 'info'}<h2 id="dialog-title">A little science.</h2>
+    <button onclick={discard}>{t('discard')}</button>
+  {:else if modal === 'info'}<h2 id="dialog-title">{t('aboutTitle')}</h2>
     <p>
-      Start with the egg already in boiling water or saturated steam in an
-      ordinary covered, unpressurized pot. Keep the heat steady; remove the egg
-      at Ready.
+      {t('aboutUse')}
     </p>
     <p>
-      Times are estimates from the Williams heating model, adjusted for
-      pressure. Texture is a continuous, provisional mapping: Soft 1×, Jammy
-      1.5× and Firm 2× the Soft heating time. The range starts at 0.75× and
-      extends to 2.25× without claiming a firmer texture. Steam and immersion
-      share an approximation awaiting kitchen validation.
+      {t('aboutModel')}
     </p>
     <p>
-      Illustrated progress, not a measurement inside the egg. Elevation
-      estimates local air pressure; changing air pressure fine-tunes that value
-      directly. Location fills elevation and weather pressure together.
-      Elevation changes reset pressure to the standard-atmosphere estimate. The
-      temperature on Start is the water’s boiling temperature, not the egg’s
-      internal temperature. Near Everest it is about 70 °C. Eggs can still cook,
-      but ordinary firm whites and yolks are not assured. Different proteins set
-      at different temperatures and rates; there is no single reliable altitude
-      cutoff for each texture. Below 85 °C we flag the estimate as exploratory,
-      not impossible.
-      <a href="https://doi.org/10.1038/s44172-024-00334-w"
-        >Egg heating research</a
+      {t('aboutScience')}
+      <a href="https://doi.org/10.1038/s44172-024-00334-w">{t('eggResearch')}</a
       >.
     </p>
     <p>
-      Soft and Jammy are not fully cooked. Firm is no pasteurization guarantee.
-      Doneness is not food-safety assurance.
+      {t('aboutSafety')}
     </p>
     <p>
-      Keep the page visible and the device awake to hear the alarm. Browser
-      suspension can prevent sound. Reload recovery is best-effort in this tab;
-      offline reopening is not guaranteed.
+      {t('aboutPlatform')}
     </p>
-    <p>
-      {conditionsLabel}{shownConditions.altitudeM !== null
-        ? ` · ${Math.round(shownConditions.altitudeM)} m`
-        : ''}{shownConditions.weatherTimeSeconds
-        ? ` · ${new Date(shownConditions.weatherTimeSeconds * 1000).toLocaleString()}`
-        : ''}
-    </p>
+    <p>{conditionDetails}</p>
     <p id="location-help">
-      Location is optional. Use location immediately requests access.
-      Coordinates rounded to three decimals are sent to Open-Meteo for
-      conditions and BigDataCloud for a city/locality label, along with your IP
-      address. Open-Meteo may retain request logs for up to 90 days.
-      BigDataCloud uses anonymous coordinate/IP pairings to improve its location
-      service. Coordinates are never saved by this app. Only the active real
-      timer is stored in this tab; stopping, finishing and going back delete it.
-      A separate automatic-location preference is saved on this browser. Repeat
-      visits refresh only when the browser already grants location permission.
-      Safari controls how long its permission lasts. The city is approximate,
-      optional and never saved; a missing name does not affect the timer.
+      {t('aboutPrivacy')}
     </p>
     <p>
-      Weather and elevation: <a href="https://open-meteo.com/">Open-Meteo</a>,
+      {t('weatherElevation')}
+      <a href="https://open-meteo.com/">Open-Meteo</a>,
       <a href="https://doi.org/10.5270/ESA-c5d3d65">Copernicus DEM</a>,
       <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
-      Pressure is converted locally into boiling temperature and cooking time.
-      <a href="https://open-meteo.com/en/terms">Provider terms & privacy</a>.
-      Personal, non-commercial use. City/locality:
+      {t('pressureConverted')}
+      <a href="https://open-meteo.com/en/terms">{t('providerTerms')}</a>.
+      {t('personalUse')}
       <a
         href="https://www.bigdatacloud.com/free-api/free-reverse-geocode-to-city-api"
         >BigDataCloud</a
       >
       (<a href="https://www.bigdatacloud.com/privacy-and-cookie-policy"
-        >privacy</a
+        >{t('privacy')}</a
       >).
     </p>
     <label class="location-preference"
@@ -1060,7 +1132,18 @@
         type="checkbox"
         checked={autoLocation}
         onchange={(event) => rememberLocation(event.currentTarget.checked)}
-      /> Refresh location automatically on visits</label
+      />
+      {t('refreshAutomatically')}</label
     >
-    <button onclick={closeModal}>Close</button>{/if}
+    <button onclick={closeModal}>{t('close')}</button>{/if}
+  {#if modal}<label class="dialog-language language-choice">
+      <span>{t('language')}</span>
+      <select
+        value={locale}
+        onchange={(event) => chooseLocale(event.currentTarget.value as Locale)}
+      >
+        <option value="en">{t('english')}</option>
+        <option value="de">{t('german')}</option>
+      </select>
+    </label>{/if}
 </dialog>

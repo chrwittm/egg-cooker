@@ -76,7 +76,7 @@ export class EnvironmentLookup {
     this.controller?.abort();
     this.controller = null;
   }
-  async start() {
+  async start(localityLanguage: 'en' | 'de' = 'en') {
     this.cancel();
     const generation = this.generation;
     const controller = new AbortController();
@@ -129,7 +129,7 @@ export class EnvironmentLookup {
       if (this.lookupPlace) {
         // Optional label never blocks weather or changes its fallback.
         void fetchJson(
-          `https://api.bigdatacloud.net/data/reverse-geocode-client?${query}&localityLanguage=en`,
+          `https://api.bigdatacloud.net/data/reverse-geocode-client?${query}&localityLanguage=${localityLanguage}`,
           controller.signal,
           this.request,
         )

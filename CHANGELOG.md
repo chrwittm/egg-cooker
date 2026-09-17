@@ -2,7 +2,13 @@
 
 ## Unreleased
 
-No changes yet.
+- Add a complete English/German interface with browser-language detection, an explicit local preference and locale-aware locality labels/dates.
+- Align the Location data surface with the three configuration rails.
+- Add the original Bold egg favicon, Apple touch icon and browser manifest icon set without adding an offline/PWA promise.
+- Replace the Ready melody with the bundled public-domain warm rooster call, retaining synthesized activation/ticks and Ready fallback.
+- Preserve active-cook, recovery, location-consent and foreground-only alarm boundaries while changing presentation.
+
+Known release-acceptance work: foreground Safari and newly added iPhone Home Screen sound/icon checks remain pending; background/locked-device alarms, offline reopening and native timer behavior remain unsupported.
 
 ## 0.1.0 — 2026-09-16
 

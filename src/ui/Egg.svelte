@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Illustration } from '../domain/egg';
-  let { frame }: { frame: Illustration } = $props();
+  let { frame, label }: { frame: Illustration; label: string } = $props();
   const id = $props.id();
   const eggPath =
     'M120 14C78 14 29 98 29 156C29 214 68 244 120 244C172 244 211 214 211 156C211 98 162 14 120 14Z';
@@ -9,7 +9,7 @@
 <div
   class="egg-art"
   role="img"
-  aria-label={`Illustrated progress, not a measurement inside the egg. ${frame.stage}`}
+  aria-label={label}
   data-white={frame.white.toFixed(4)}
   data-yolk={frame.yolk.toFixed(4)}
 >

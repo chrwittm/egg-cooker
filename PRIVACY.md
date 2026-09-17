@@ -1,6 +1,6 @@
 # Egg Cooker privacy
 
-**Updated: 2026-09-16.** Cooking calculations and the animated timer run in your browser. There are no accounts, analytics, application backend or cloud history.
+**Updated: 2026-09-17.** Cooking calculations and the animated timer run in your browser. There are no accounts, analytics, application backend or cloud history.
 
 ## This tab's active timer
 
@@ -14,8 +14,14 @@ The app requests browser location on a **Use location / Refresh** tap, with coor
 
 Open-Meteo may log request coordinates/metadata and retain API logs for up to 90 days under its [terms and privacy policy](https://open-meteo.com/en/terms). These are external provider practices, checked on 2026-09-15; they may change. Data are credited to Open-Meteo/Copernicus in About. BigDataCloud receives the rounded coordinates and IP address and uses anonymous pairings to improve IP location; see its [privacy policy](https://www.bigdatacloud.com/privacy-and-cookie-policy) and [service explanation](https://www.bigdatacloud.com/docs/article/why-is-reverse-geocoding-api-free), reviewed 2026-09-16. The app holds only the optional city/locality text in memory and never saves it. It does not use an IP-derived location fallback. Lookups run on taps or once per eligible visit, never polled or triggered by sliders. The saved boolean contains no location and is retained until switched off or browser site data are cleared. Reset/cancel invalidates the lookup; it cannot retract a request the provider already received. Standard-pressure cooking remains available without permission or network success.
 
+BigDataCloud receives `en` or `de` as the requested locality-label language only during an otherwise authorized lookup. Changing the interface language does not request location or start network work.
+
+## Language preference
+
+An explicit English/German choice is stored in `localStorage` under `egg-cooker.language.v1` as only `en` or `de`. It contains no personal data and does not alter or migrate an active timer. If preference storage is unavailable, the choice still works for the current page and the next visit returns to the first supported browser language, then English. Clearing browser site data removes the preference.
+
 ## Hosting and development
 
-When hosted, the browser contacts the hosting provider to download the app. That provider may process request metadata under its own policy. All application images, fonts and sound use original local SVG/CSS, system fonts and generated tones; there are no remote asset downloads beyond the requested environment/locality APIs.
+When hosted, the browser contacts the hosting provider to download the app. That provider may process request metadata under its own policy. Application icons, the public-domain Ready recording, original SVG/CSS and synthesized cues are bundled with the site; system fonts are used. There are no runtime asset downloads beyond the requested environment/locality APIs. See [sound credits](SOUND_CREDITS.md).
 
 Development/CI use package registries and browser downloads. npm audit submits dependency metadata to npm. Test traces/screenshots can contain displayed data; automated tests and the Open-Meteo live smoke use synthetic public coordinates. BigDataCloud is intercepted/blocked in these tests because its live endpoint permits only the calling device’s real location. Actual-device locality acceptance must avoid logs/screenshots containing private places. Do not publish private artifacts. See [security/privacy operations](docs/operations/security-privacy.md) and the [user guide](docs/user-guide.md).

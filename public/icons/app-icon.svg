@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">Egg Cooker</title>
+  <defs>
+    <radialGradient id="yolk" cx="34%" cy="28%">
+      <stop stop-color="#ffba39" />
+      <stop offset=".62" stop-color="#ee8b10" />
+      <stop offset="1" stop-color="#d46a09" />
+    </radialGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="180%">
+      <feDropShadow dx="0" dy="11" stdDeviation="10" flood-color="#49351c" flood-opacity=".14" />
+    </filter>
+  </defs>
+  <rect width="512" height="512" fill="#f8f5ec" />
+  <g transform="translate(72 54) scale(1.54)" filter="url(#shadow)">
+    <path d="M120 14C78 14 29 98 29 156C29 214 68 244 120 244C172 244 211 214 211 156C211 98 162 14 120 14Z" fill="#fffdf4" stroke="#483821" stroke-width="4.1" />
+    <circle cx="120" cy="151" r="58" fill="#ecac32" stroke="#ce851a" stroke-width="1.8" />
+    <circle cx="120" cy="151" r="47" fill="url(#yolk)" />
+    <ellipse cx="101" cy="127" rx="15" ry="8" transform="rotate(-28 101 127)" fill="#fff8cd" opacity=".72" />
+  </g>
+</svg>

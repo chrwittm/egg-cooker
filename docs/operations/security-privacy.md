@@ -16,6 +16,8 @@ The [quick-cook specification](../product/specifications/0001-mvp.md) owns the a
 
 Direct public environmental APIs are expressly within the accepted MVP scope. An application backend, secret-bearing API, proxy, account or alternative host remains excluded. Provider access/terms changes require an explicit product decision; they cannot be worked around by embedding credentials in the static bundle. Standard conditions allow a loaded cooking journey to continue without external access.
 
+The explicit interface-language preference stores only validated `en` or `de` under `egg-cooker.language.v1`. It is independent of the active-cook schema and contains no personal data. Changing language does not trigger a location request; the selected language is sent to BigDataCloud only with an otherwise authorized locality lookup.
+
 ## Dependency policy
 
 Use the lockfile and `npm ci` for verification and releases. Direct versions are exact; update deliberately with the manifest and lockfile together. Review compatibility, maintenance, license, and reason for adding a package. Installation and npm audit need network access; audit sends dependency metadata to npm. Those are normal documented development operations, not app telemetry.

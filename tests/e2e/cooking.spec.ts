@@ -737,6 +737,26 @@ test('built assets and build identity load from the configured base without remo
   const response = await page.request.get('build-info.json');
   expect(response.ok()).toBe(true);
   expect(await response.json()).toMatchObject({ version: '0.1.0' });
+  const manifestLink = page.locator('link[rel="manifest"]');
+  await expect(manifestLink).toHaveAttribute('href', './manifest.webmanifest');
+  await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveAttribute(
+    'href',
+    './icons/apple-touch-icon.png?v=0.1.1',
+  );
+  const manifestResponse = await page.request.get('manifest.webmanifest');
+  expect(manifestResponse.ok()).toBe(true);
+  const manifest = (await manifestResponse.json()) as {
+    display: string;
+    icons: { src: string; purpose?: string }[];
+  };
+  expect(manifest.display).toBe('browser');
+  expect(manifest.icons.some((icon) => icon.purpose === 'maskable')).toBe(true);
+  for (const icon of manifest.icons) {
+    expect((await page.request.get(icon.src)).ok()).toBe(true);
+  }
+  const html = await (await page.request.get('./')).text();
+  expect(html).toContain('Egg Cooker could not start. Please reload');
+  expect(html).toContain('Egg Cooker konnte nicht gestartet werden');
   expect(failures).toEqual([]);
   expect(remote).toEqual([]);
 });
@@ -1506,9 +1526,9 @@ test('last ten seconds tick, target alarms persist beyond a minute, Stop timer s
   }
   await setTime(page, record.targetAtMs);
   await expect.poll(async () => (await tones()).length).toBe(14);
-  await setTime(page, record.targetAtMs + 2000);
+  await setTime(page, record.targetAtMs + 5000);
   await expect.poll(async () => (await tones()).length).toBe(17);
-  await setTime(page, record.targetAtMs + 62000);
+  await setTime(page, record.targetAtMs + 65000);
   await expect.poll(async () => (await tones()).length).toBe(20);
   await page.getByRole('button', { name: 'Stop timer' }).click();
   await setTime(page, record.targetAtMs + 70000);
@@ -1584,6 +1604,25 @@ test('texture highlighting covers the continuum and location has clear separatio
   const heading = page.getByRole('heading', { name: 'Location data' });
   await expect(heading).toBeVisible();
   const rail = (await page.locator('.doneness .preset-rail').boundingBox())!;
+  const surfaces = await page.evaluate(() => {
+    const railStyle = getComputedStyle(document.querySelector('.preset-rail')!);
+    const locationStyle = getComputedStyle(
+      document.querySelector('.environment')!,
+    );
+    return {
+      rail: [
+        railStyle.backgroundColor,
+        railStyle.border,
+        railStyle.borderRadius,
+      ],
+      location: [
+        locationStyle.backgroundColor,
+        locationStyle.border,
+        locationStyle.borderRadius,
+      ],
+    };
+  });
+  expect(surfaces.location).toEqual(surfaces.rail);
   const title = (await heading.boundingBox())!;
   expect(title.y - rail.y - rail.height).toBeGreaterThanOrEqual(16);
   await expect(page.locator('.conditions-label')).toHaveText(
@@ -1593,4 +1632,254 @@ test('texture highlighting covers the continuum and location has clear separatio
     .getByRole('button', { name: /^Start/ })
     .boundingBox())!;
   expect(start.y + start.height).toBeLessThanOrEqual(740);
+});
+
+test('German browser preference and an explicit persisted choice control all page metadata', async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'languages', {
+      configurable: true,
+      get: () => ['de-DE', 'en-US'],
+    });
+  });
+  await page.goto('./');
+  await expect(
+    page.getByRole('heading', { name: 'Ei einstellen' }),
+  ).toBeVisible();
+  await expect(page.locator('html')).toHaveAttribute('lang', 'de');
+  await expect(page).toHaveTitle('Egg Cooker');
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+    'content',
+    /wissenschaftlich fundierter Eier-Timer/,
+  );
+  await page.getByRole('button', { name: 'Optionen' }).click();
+  await page.getByLabel('Language / Sprache').selectOption('en');
+  await expect(
+    page.getByRole('heading', { name: 'Configure your egg' }),
+  ).toBeVisible();
+  expect(
+    await page.evaluate(() => localStorage.getItem('egg-cooker.language.v1')),
+  ).toBe('en');
+  await page.reload();
+  await expect(
+    page.getByRole('heading', { name: 'Configure your egg' }),
+  ).toBeVisible();
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+});
+
+test('an unsupported browser locale falls back to English', async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'languages', {
+      configurable: true,
+      get: () => ['fr-FR', 'es-ES'],
+    });
+  });
+  await page.goto('./');
+  await expect(
+    page.getByRole('heading', { name: 'Configure your egg' }),
+  ).toBeVisible();
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+});
+
+test('language changes in Configure, Cook and Ready preserve the committed timer and sound state', async ({
+  page,
+}) => {
+  await setup(page);
+  await page.getByRole('button', { name: 'L · 70 grams' }).click();
+  await page.getByRole('button', { name: 'Options' }).click();
+  await page.getByLabel('Language / Sprache').selectOption('de');
+  await expect(page.getByLabel('Größe')).toHaveValue('70');
+  await expect(page.getByLabel('Höhe')).toHaveValue('0');
+  expect(await page.evaluate(() => sessionStorage.length)).toBe(0);
+  await page.getByRole('checkbox', { name: 'Demo' }).uncheck();
+  await page.getByRole('button', { name: 'Optionen' }).click();
+  await page.getByRole('button', { name: /^Starten/ }).click();
+  const committed = await page.evaluate(
+    (key) => sessionStorage.getItem(key),
+    key,
+  );
+  await expect(page.getByRole('heading', { name: 'Kochen' })).toBeVisible();
+  const remaining = await page.getByLabel('Verbleibende Zeit').textContent();
+  await page.getByRole('button', { name: 'Optionen' }).click();
+  await page.getByLabel('Language / Sprache').selectOption('en');
+  await expect(page.getByRole('heading', { name: 'Cooking' })).toBeVisible();
+  await expect(page.getByLabel('Time remaining')).toHaveText(remaining!);
+  expect(await page.evaluate((key) => sessionStorage.getItem(key), key)).toBe(
+    committed,
+  );
+  await expect(
+    page.getByRole('button', { name: 'Mute sound' }),
+  ).toHaveAttribute('aria-pressed', 'true');
+  await page.getByRole('button', { name: 'Options' }).click();
+  const target = JSON.parse(committed!).targetAtMs as number;
+  await setTime(page, target);
+  await expect(page.getByRole('heading', { name: 'Ready' })).toBeVisible();
+  await page.getByRole('button', { name: 'Options' }).click();
+  await page.getByLabel('Language / Sprache').selectOption('de');
+  await expect(page.getByRole('heading', { name: 'Fertig' })).toBeVisible();
+  expect(await page.evaluate((key) => sessionStorage.getItem(key), key)).toBe(
+    committed,
+  );
+  await expect(
+    page.getByRole('button', { name: 'Ton ausschalten' }),
+  ).toHaveAttribute('aria-pressed', 'true');
+});
+
+test('language changes inside recovery keep the modal, snapshot and muted state', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(now);
+  await page.addInitScript(
+    ({ key, record }) => sessionStorage.setItem(key, JSON.stringify(record)),
+    { key, record },
+  );
+  await page.goto('./');
+  const saved = await page.evaluate((key) => sessionStorage.getItem(key), key);
+  await page.getByLabel('Language / Sprache').selectOption('de');
+  await expect(
+    page.getByRole('heading', {
+      name: 'Wiederhergestellt · Gart das Ei noch?',
+    }),
+  ).toBeVisible();
+  await expect(page.getByLabel('Verbleibende Zeit')).toHaveText('7:19');
+  expect(await page.evaluate((key) => sessionStorage.getItem(key), key)).toBe(
+    saved,
+  );
+  await expect(
+    page.getByRole('button', { name: 'Ton einschalten und testen' }),
+  ).toHaveAttribute('aria-pressed', 'false');
+});
+
+test('German remains reachable at 320 px, 390 by 740 and 200 percent text', async ({
+  page,
+}, testInfo) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'languages', {
+      configurable: true,
+      get: () => ['de-DE'],
+    });
+  });
+  await page.setViewportSize({ width: 320, height: 740 });
+  await page.goto('./');
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  await page.addStyleTag({ content: ':root{font-size:200%}' });
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  await page.getByRole('button', { name: 'Starten' }).scrollIntoViewIfNeeded();
+  await expect(page.getByRole('button', { name: 'Starten' })).toBeVisible();
+  await page.setViewportSize({ width: 390, height: 740 });
+  await page.screenshot({
+    path: testInfo.outputPath('german-390x740-zoom.png'),
+    fullPage: true,
+  });
+  await page.getByRole('button', { name: 'Über diesen Timer' }).click();
+  await expect(page.getByRole('button', { name: 'Schließen' })).toBeVisible();
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+});
+
+test('decoded Ready calls never overlap, repeat after quiet spacing and preview when re-enabled', async ({
+  page,
+}) => {
+  const soundRequests: string[] = [];
+  page.on('request', (request) => {
+    if (request.url().includes('rooster-ready-warm'))
+      soundRequests.push(request.url());
+  });
+  await page.addInitScript(() => {
+    const calls = { starts: 0, stops: 0, sources: [] as unknown[] };
+    Object.assign(window, { testReadyCalls: calls });
+    class TestAudio {
+      state = 'running';
+      currentTime = 0;
+      destination = {};
+      async resume() {}
+      async close() {}
+      async decodeAudioData() {
+        return { duration: 3.4 };
+      }
+      createGain() {
+        return {
+          gain: {
+            setValueAtTime() {},
+            linearRampToValueAtTime() {},
+            exponentialRampToValueAtTime() {},
+          },
+          connect() {},
+          disconnect() {},
+        };
+      }
+      createOscillator() {
+        const node = {
+          frequency: { value: 0 },
+          type: '',
+          onended: null as (() => void) | null,
+          connect() {},
+          disconnect() {},
+          start() {},
+          stop() {
+            node.onended?.();
+          },
+        };
+        return node;
+      }
+      createBufferSource() {
+        const source = {
+          buffer: null,
+          onended: null as (() => void) | null,
+          connect() {},
+          disconnect() {},
+          start() {
+            calls.starts++;
+          },
+          stop() {
+            calls.stops++;
+            source.onended?.();
+          },
+        };
+        calls.sources.push(source);
+        return source;
+      }
+    }
+    Object.assign(window, { AudioContext: TestAudio });
+  });
+  await setup(page);
+  await page.getByRole('button', { name: /^Start/ }).click();
+  await setTime(page, record.targetAtMs);
+  const calls = () =>
+    page.evaluate(() => {
+      const value = (
+        window as unknown as {
+          testReadyCalls: { starts: number; stops: number };
+        }
+      ).testReadyCalls;
+      return { starts: value.starts, stops: value.stops };
+    });
+  await expect.poll(async () => (await calls()).starts).toBe(1);
+  await setTime(page, record.targetAtMs + 5000);
+  expect((await calls()).starts).toBe(1);
+  await page.evaluate(() => {
+    const sources = (
+      window as unknown as {
+        testReadyCalls: { sources: { onended: (() => void) | null }[] };
+      }
+    ).testReadyCalls.sources;
+    sources[0]?.onended?.();
+  });
+  await setTime(page, record.targetAtMs + 10000);
+  await expect.poll(async () => (await calls()).starts).toBe(2);
+  await page.getByRole('button', { name: 'Mute sound' }).click();
+  await setTime(page, record.targetAtMs + 20000);
+  expect((await calls()).starts).toBe(2);
+  await page.getByRole('button', { name: 'Enable and test sound' }).click();
+  await expect.poll(async () => (await calls()).starts).toBe(3);
+  expect(soundRequests).toHaveLength(1);
+  expect(soundRequests[0]).toMatch(
+    /^http:\/\/127\.0\.0\.1:4173\/.*rooster-ready-warm.*\.mp3$/,
+  );
 });

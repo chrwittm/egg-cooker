@@ -4,7 +4,57 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="referrer" content="no-referrer" />
+    <meta name="theme-color" content="#f8f5ec" />
+    <meta name="application-name" content="Egg Cooker" />
+    <meta
+      name="description"
+      content="Set your egg. Watch it cook. A simple, science-informed egg timer."
+    />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" href="./icons/app-icon.svg" type="image/svg+xml" />
+    <link rel="icon" href="./icons/favicon-32.png" sizes="32x32" />
+    <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png?v=0.1.1" />
     <title>Egg Cooker</title>
+    <script>
+      (() => {
+        const supported = ['en', 'de'];
+        let saved = null;
+        try {
+          saved = localStorage.getItem('egg-cooker.language.v1');
+        } catch {
+          // The browser language remains the safe fallback.
+        }
+        const requested = Array.isArray(navigator.languages)
+          ? navigator.languages
+          : [navigator.language];
+        const language = supported.includes(saved)
+          ? saved
+          : requested
+              .map((value) => String(value).toLowerCase().split('-')[0])
+              .find((value) => supported.includes(value)) || 'en';
+        document.documentElement.lang = language;
+        if (language === 'de') {
+          document
+            .querySelector('meta[name="description"]')
+            ?.setAttribute(
+              'content',
+              'Ei einstellen, beim Garen zusehen: ein einfacher, wissenschaftlich fundierter Eier-Timer.',
+            );
+        }
+        addEventListener(
+          'DOMContentLoaded',
+          () => {
+            const failure = document.querySelector('#startup-error');
+            if (failure)
+              failure.textContent =
+                language === 'de'
+                  ? 'Egg Cooker konnte nicht gestartet werden. Lade die Seite neu und versuche es noch einmal.'
+                  : 'Egg Cooker could not start. Please reload to try again.';
+          },
+          { once: true },
+        );
+      })();
+    </script>
   </head>
   <body>
     <div id="app">

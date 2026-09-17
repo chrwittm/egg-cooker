@@ -237,7 +237,7 @@ describe('storage failure isolation', () => {
   });
 });
 describe('audio reminder policy', () => {
-  it('repeats every two real seconds while visible until acknowledged, without replaying missed cues', () => {
+  it('leaves quiet spacing after each recorded call while visible until acknowledged', () => {
     const window = new ReminderWindow();
     expect(window.due(now, false, true, true)).toBe(false);
     expect(window.due(now, true, false, true)).toBe(false);
@@ -277,7 +277,7 @@ describe('audio reminder policy', () => {
   });
 });
 
-it('generates short cues without overlap and disconnects stopped audio nodes', async () => {
+it('plays the recorded Ready call without overlap and disconnects stopped audio nodes', async () => {
   const nodes: {
     start: ReturnType<typeof vi.fn>;
     stop: ReturnType<typeof vi.fn>;
@@ -288,6 +288,15 @@ it('generates short cues without overlap and disconnects stopped audio nodes', a
     type: string;
   }[] = [];
   const gains: { disconnect: ReturnType<typeof vi.fn> }[] = [];
+  const sources: {
+    start: ReturnType<typeof vi.fn>;
+    stop: ReturnType<typeof vi.fn>;
+    disconnect: ReturnType<typeof vi.fn>;
+    connect: ReturnType<typeof vi.fn>;
+    onended: (() => void) | null;
+    buffer: AudioBuffer | null;
+  }[] = [];
+  const buffer = {} as AudioBuffer;
   const context = {
     state: 'running',
     currentTime: 10,
@@ -320,33 +329,98 @@ it('generates short cues without overlap and disconnects stopped audio nodes', a
       gains.push(gain);
       return gain;
     },
+    createBufferSource: () => {
+      const source = {
+        start: vi.fn(),
+        stop: vi.fn(),
+        disconnect: vi.fn(),
+        connect: vi.fn(),
+        onended: null as (() => void) | null,
+        buffer: null as AudioBuffer | null,
+      };
+      sources.push(source);
+      return source;
+    },
   };
   const unavailable = vi.fn();
+  const loadAlarm = vi.fn(async () => buffer);
   const sound = new CookSound(
     unavailable,
     () => context as unknown as AudioContext,
+    loadAlarm,
   );
   await sound.enable();
+  expect(loadAlarm).toHaveBeenCalledOnce();
   expect(nodes).toHaveLength(1);
   expect(nodes[0]!.start).toHaveBeenCalledWith(10);
   nodes[0]!.onended!();
   expect(gains[0]!.disconnect).toHaveBeenCalledOnce();
   sound.play();
-  expect(nodes).toHaveLength(4);
+  await vi.waitFor(() => expect(sources).toHaveLength(1));
+  expect(sources[0]!.buffer).toBe(buffer);
+  expect(sources[0]!.start).toHaveBeenCalledOnce();
+  sound.play();
+  await Promise.resolve();
+  expect(sources).toHaveLength(1);
+  sources[0]!.onended!();
+  expect(sources[0]!.disconnect).toHaveBeenCalledOnce();
+  sound.play();
+  await vi.waitFor(() => expect(sources).toHaveLength(2));
+  sound.stop();
+  expect(sources[1]!.stop).toHaveBeenCalledOnce();
+  sound.close();
+  expect(context.close).toHaveBeenCalledOnce();
+  expect(unavailable).not.toHaveBeenCalled();
+});
+
+it('falls back to the synthesized Ready melody when the recording fails', async () => {
+  const nodes: {
+    frequency: { value: number };
+    onended: (() => void) | null;
+  }[] = [];
+  const context = {
+    state: 'running',
+    currentTime: 10,
+    destination: {},
+    resume: async () => {},
+    createOscillator: () => {
+      const node = {
+        start: vi.fn(),
+        stop: vi.fn(),
+        disconnect: vi.fn(),
+        onended: null as (() => void) | null,
+        frequency: { value: 0 },
+        connect: vi.fn(),
+        type: '',
+      };
+      nodes.push(node);
+      return node;
+    },
+    createGain: () => ({
+      gain: {
+        setValueAtTime: vi.fn(),
+        linearRampToValueAtTime: vi.fn(),
+        exponentialRampToValueAtTime: vi.fn(),
+      },
+      connect: vi.fn(),
+      disconnect: vi.fn(),
+    }),
+  };
+  const unavailable = vi.fn();
+  const sound = new CookSound(
+    unavailable,
+    () => context as unknown as AudioContext,
+    async () => {
+      throw new Error('missing');
+    },
+  );
+  await sound.enable();
+  nodes[0]!.onended!();
+  sound.play();
+  await vi.waitFor(() => expect(nodes).toHaveLength(4));
   expect(nodes.slice(1).map((node) => node.frequency.value)).toEqual([
     880, 1100, 880,
   ]);
-  expect(nodes[3]!.stop.mock.calls[0]![0] - 10).toBeLessThan(2);
-  sound.play();
-  expect(nodes).toHaveLength(4);
-  sound.stop();
-  for (const node of nodes.slice(1)) {
-    expect(node.stop).toHaveBeenCalledTimes(2);
-    node.onended!();
-    expect(node.disconnect).toHaveBeenCalledOnce();
-  }
-  sound.close();
-  expect(context.close).toHaveBeenCalledOnce();
   expect(unavailable).not.toHaveBeenCalled();
 });
 
@@ -366,8 +440,8 @@ it('ticks once for each final second, never catches up or bursts in demo mode', 
   expect(fast.due(1, now + 180, true, true)).toBe(false);
   const alarm = new ReminderWindow();
   expect(alarm.due(now, true, true, true)).toBe(true);
-  expect(alarm.due(now + 1999, true, true, true)).toBe(false);
-  expect(alarm.due(now + 2000, true, true, true)).toBe(true);
+  expect(alarm.due(now + 4999, true, true, true)).toBe(false);
+  expect(alarm.due(now + 5000, true, true, true)).toBe(true);
 });
 
 it('optional place lookup does not delay weather and cannot publish after cancellation', async () => {
@@ -396,7 +470,12 @@ it('optional place lookup does not delay weather and cannot publish after cancel
     request,
     true,
   );
-  await lookup.start();
+  await lookup.start('de');
+  expect(
+    request.mock.calls.some(([url]) =>
+      String(url).includes('localityLanguage=de'),
+    ),
+  ).toBe(true);
   expect(updates.at(-1)).toMatchObject({
     pending: false,
     conditions: { source: 'weather' },
