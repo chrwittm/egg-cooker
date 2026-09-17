@@ -1,8 +1,8 @@
 # Current work
 
-**State:** FEAT-007 implementation, automated verification and actual-iPhone acceptance complete; v0.1.1 release preparation authorized.
-**Active item:** [FEAT-007](../product/specifications/0005-release-polish.md), the bounded v0.1.1 language, identity and alarm-polish slice.
-**Next action:** Prepare, verify and publish the authorized v0.1.1 candidate, then deploy and smoke-test the tagged Pages build. Kitchen observations remain separate under [TECH-001](backlog.md).
+**State:** FEAT-007 implementation and actual-iPhone acceptance complete; the rejected v0.1.1 candidate is preserved and corrective v0.1.2 release preparation is authorized.
+**Active item:** [FEAT-007](../product/specifications/0005-release-polish.md), the bounded language, identity and alarm-polish slice plus release-gate portability corrections.
+**Next action:** Verify and publish the corrective v0.1.2 candidate, then deploy and smoke-test the tagged Pages build. Kitchen observations remain separate under [TECH-001](backlog.md).
 
 ## Handoff
 
@@ -21,4 +21,5 @@
 - Backlog validation: kitchen calibration ([TECH-001](backlog.md)) and broader actual-device evidence ([TECH-002](backlog.md)); limitations remain disclosed in the app and public docs.
 - Deferred features: Guided (0002), calibration/feedback behavior, history, broader preferences, PWA and other non-goals.
 - v0.1.1 decision: consistent Location data surface, complete English/German UI, the Bold egg Home Screen icon and warm short-rooster candidate B were accepted as the next bounded slice. Foreground iPhone retesting succeeded, so no silent-audio defect was recorded. Background/locked alarms, Live Activities and Siri remain postponed platform work. [0005](../product/specifications/0005-release-polish.md) had no remaining product questions before implementation.
-- v0.1.1 implementation: the typed English/German catalog and explicit preference, locale-aware lookup/date presentation, matching Location data surface, bundled Bold egg icon/manifest set and accepted 3.4-second rooster derivative are implemented. `BASE_PATH=/egg-cooker/ npm run verify:all` passed with 96 unit/integration tests, 1 script test and 150 browser checks. [Evidence](../delivery/2026-09-17-release-polish-verification.md). The maintainer accepted foreground Safari and a newly added Home Screen item on an iPhone 16 Pro with iOS 26.6.2 after the icon artwork was shifted slightly downward; activation, Ready playback and the accepted icon passed. No v0.1.1 version/tag/release has yet been prepared.
+- v0.1.1 implementation: the typed English/German catalog and explicit preference, locale-aware lookup/date presentation, matching Location data surface, bundled Bold egg icon/manifest set and accepted 3.4-second rooster derivative are implemented. `BASE_PATH=/egg-cooker/ npm run verify:all` passed with 96 unit/integration tests, 1 script test and 150 browser checks. [Evidence](../delivery/2026-09-17-release-polish-verification.md). The maintainer accepted foreground Safari and a newly added Home Screen item on an iPhone 16 Pro with iOS 26.6.2 after the icon artwork was shifted slightly downward; activation, Ready playback and the accepted icon passed.
+- Candidate correction: shared tag `v0.1.1` identifies release-preparation commit `b9b8223`, but [Release candidate run 35256601291](https://github.com/chrwittm/egg-cooker/actions/runs/35256601291) failed reproducibly on Linux before publication. WebKit exposed intrinsic-width overflow at 320 px / 200% text, and Firefox exposed a language-state test coupled to ambient headless audio availability. Commit `9a4d7d3` contains the bounded CSS portability fix and deterministic audio test fixture. The tag will not move; v0.1.2 is the corrective release target.

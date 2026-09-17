@@ -4,7 +4,7 @@
 **Source:** Implementation commit `4ff22205c66f5f58070a1557d514137040a53c36`; device acceptance covered the content-identical application tree before that commit was created.
 **Environment:** macOS/Darwin arm64; Node 24.20.0; npm 11.19.0; Playwright 1.63.0 managed Chromium, Firefox and WebKit.
 **Specification:** [0005 — v0.1.1 release polish](../product/specifications/0005-release-polish.md), P-01–P-11.
-**Delivery tracking:** [Specification index and delivery ledger](../product/specifications/README.md). Release preparation is authorized; publication remains Pending.
+**Delivery tracking:** [Specification index and delivery ledger](../product/specifications/README.md). Corrective v0.1.2 release preparation is authorized; publication remains Pending.
 
 | Check / acceptance criterion                      | Command or procedure                                                        | Result                             | Evidence                                                                                                     |
 | ------------------------------------------------- | --------------------------------------------------------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------ |
@@ -26,8 +26,14 @@ The device-tested local production build identified package version `0.1.0` and 
 
 The final Bold egg was moved slightly downward after the first iOS preview, rebuilt with a versioned Apple-touch-icon URL to avoid stale preview caching, and accepted in Safari plus a newly added Home Screen item on an iPhone 16 Pro with iOS 26.6.2. Activation and Ready playback worked on the physical speaker. This does not establish VoiceOver behavior or background, locked-device, silent-mode or Focus reliability.
 
+## Release-candidate correction
+
+Shared tag `v0.1.1` identifies release-preparation commit `b9b822333e4b08eea7782660eb63a23923fe5c7e`. Its [Linux release-candidate run 35256601291](https://github.com/chrwittm/egg-cooker/actions/runs/35256601291) failed before publication, and a rerun reproduced both failures: Linux WebKit exceeded the viewport at 320 px with 200% text, while Firefox's language-state test inherited unavailable headless audio and legitimately muted the application. The first was a portability defect; the second was a nondeterministic test fixture rather than a product-language defect.
+
+Commit `9a4d7d3` constrains intrinsic widths without hiding content and supplies deterministic available audio to the presentation-only language journey. The focused two-test matrix passed in all three browsers, followed by the complete macOS gate with 96 Vitest tests, 1 release-script test and 150 Playwright checks. Because the shared tag is immutable, `v0.1.1` remains an unpublished rejected candidate and v0.1.2 is the corrective release target.
+
 ## Limits and follow-up
 
 - Preserve the exact implementation and release commit identities plus candidate checksum in the publication evidence.
 - Do not test or claim reliable background, locked-device, silent-mode or Focus behavior as part of this slice.
-- Prepare the separate v0.1.1 candidate/version/tag/release flow. Never move `v0.1.0`.
+- Complete the separate v0.1.2 candidate/version/tag/release flow. Never move `v0.1.0` or the shared rejected `v0.1.1` tag.
