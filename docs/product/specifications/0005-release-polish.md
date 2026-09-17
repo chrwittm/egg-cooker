@@ -1,6 +1,6 @@
 # FEAT-007 — v0.1.1 language, identity and alarm polish
 
-**Status:** Verified — automated and actual-iPhone acceptance passed; release preparation authorized
+**Status:** Released in experimental v0.1.2 — automated, Linux candidate and actual-iPhone acceptance passed
 **Sequence:** 0005; proposed next release slice after the published 0.1.0 experiment.
 **Updated:** 2026-09-17
 **Acceptance decision:** On 2026-09-17 the maintainer accepted the bounded scope below, icon option 2 (Bold egg) and short-rooster candidate B, the warmer public-domain recording by Benchill.
@@ -125,7 +125,7 @@ This specification extends [0001 — Quick-cook MVP](0001-mvp.md) and [0004 — 
 
 Prefer an explicit project-local message catalog over a localization dependency for two languages unless implementation demonstrates missing plural, fallback or tooling needs that justify a maintained dependency. Reuse the original SVG egg geometry for icon source artwork. Keep sound loading behind the existing browser-audio adapter so UI and domain rules do not own decoding or fallback behavior.
 
-Implementation must reconcile the accepted final choices with the living MVP, product context, user guide, privacy/asset documentation, changelog and release records. A published v0.1.1 requires its own verified source identity; never move the v0.1.0 tag.
+Implementation must reconcile the accepted final choices with the living MVP, product context, user guide, privacy/asset documentation, changelog and release records. A published release requires its own verified source identity; never move an existing shared tag. The v0.1.1 candidate failed its Linux gate and remained unpublished; this accepted scope shipped in corrective v0.1.2.
 
 ## Open questions
 
