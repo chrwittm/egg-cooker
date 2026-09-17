@@ -736,7 +736,7 @@ test('built assets and build identity load from the configured base without remo
   await setup(page);
   const response = await page.request.get('build-info.json');
   expect(response.ok()).toBe(true);
-  expect(await response.json()).toMatchObject({ version: '0.1.0' });
+  expect(await response.json()).toMatchObject({ version: '0.1.1' });
   const manifestLink = page.locator('link[rel="manifest"]');
   await expect(manifestLink).toHaveAttribute('href', './manifest.webmanifest');
   await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveAttribute(

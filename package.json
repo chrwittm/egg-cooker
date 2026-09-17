@@ -1,6 +1,6 @@
 {
   "name": "egg-cooker",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
   "description": "A simple, science-informed egg timer with an animated cooking illustration.",

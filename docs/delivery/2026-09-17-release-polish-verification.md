@@ -1,7 +1,7 @@
 # Verification — FEAT-007 v0.1.1 release polish
 
 **Date:** 2026-09-17
-**Source:** Device-tested working tree based on `c43da36`; implementation commit pending.
+**Source:** Implementation commit `4ff22205c66f5f58070a1557d514137040a53c36`; device acceptance covered the content-identical application tree before that commit was created.
 **Environment:** macOS/Darwin arm64; Node 24.20.0; npm 11.19.0; Playwright 1.63.0 managed Chromium, Firefox and WebKit.
 **Specification:** [0005 — v0.1.1 release polish](../product/specifications/0005-release-polish.md), P-01–P-11.
 **Delivery tracking:** [Specification index and delivery ledger](../product/specifications/README.md). Release preparation is authorized; publication remains Pending.
@@ -22,7 +22,7 @@
 
 ## Artifact and acceptance
 
-The device-tested local production build identifies package version `0.1.0` and base commit `c43da36` because the accepted application changes were still in the working tree and v0.1.1 versioning had not yet been performed. The subsequent release-preparation changes are limited to version and documentation metadata; the tested application code and assets are frozen in the implementation commit recorded in the delivery ledger. Vite emitted the bundled 41.73 kB `rooster-ready-warm` MP3 and the complete public icon/manifest set. The shipped MP3 SHA-256 is `1db417d0bced989e534683dcba90708f5ec5d037ae9caf95ae1ea7b8642d3a90`.
+The device-tested local production build identified package version `0.1.0` and base commit `c43da36` because the accepted application changes were still in the working tree. Commit `4ff2220` freezes that exact application code and asset content. Subsequent release-preparation changes are limited to version and documentation metadata. Vite emitted the bundled 41.73 kB `rooster-ready-warm` MP3 and the complete public icon/manifest set. The shipped MP3 SHA-256 is `1db417d0bced989e534683dcba90708f5ec5d037ae9caf95ae1ea7b8642d3a90`.
 
 The final Bold egg was moved slightly downward after the first iOS preview, rebuilt with a versioned Apple-touch-icon URL to avoid stale preview caching, and accepted in Safari plus a newly added Home Screen item on an iPhone 16 Pro with iOS 26.6.2. Activation and Ready playback worked on the physical speaker. This does not establish VoiceOver behavior or background, locked-device, silent-mode or Focus reliability.
 
