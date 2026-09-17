@@ -18,13 +18,16 @@
 * {
   box-sizing: border-box;
 }
+html,
 body {
+  max-width: 100%;
   margin: 0;
 }
 button,
 input,
 select {
   font: inherit;
+  max-width: 100%;
 }
 button {
   color: inherit;
@@ -36,7 +39,8 @@ button {
   padding: 9px 16px;
   font-weight: 600;
   hyphens: auto;
-  overflow-wrap: break-word;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 button:hover {
   background: #eee6d6;
@@ -68,6 +72,7 @@ h1:focus {
 
 main {
   max-width: 440px;
+  min-width: 0;
   margin: auto;
   padding: 8px 22px 16px;
 }
@@ -79,6 +84,7 @@ header {
   min-height: 44px;
   margin-bottom: 8px;
   flex-wrap: wrap;
+  min-width: 0;
 }
 .wordmark {
   font-size: 1.25rem;
@@ -94,6 +100,8 @@ header {
   margin-left: auto;
   flex-wrap: wrap;
   justify-content: flex-end;
+  min-width: 0;
+  max-width: 100%;
 }
 .icon {
   display: grid;
@@ -168,9 +176,11 @@ header {
   position: relative;
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 .configure {
   width: 100%;
+  min-width: 0;
 }
 .active .configure,
 main:not(.active) .timer-panel {
@@ -194,7 +204,7 @@ main:not(.active) .timer-panel {
 .control-title label,
 .location-title {
   hyphens: auto;
-  overflow-wrap: break-word;
+  overflow-wrap: anywhere;
 }
 .control-title output {
   font-size: 1.25rem;

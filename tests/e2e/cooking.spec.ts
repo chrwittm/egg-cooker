@@ -30,6 +30,59 @@ async function setup(page: Page) {
   await realMode(page);
   await page.getByRole('button', { name: 'Jammy', exact: true }).click();
 }
+async function availableAudio(page: Page) {
+  await page.addInitScript(() => {
+    class TestAudio {
+      state = 'running';
+      currentTime = 0;
+      destination = {};
+      async resume() {}
+      async close() {}
+      async decodeAudioData() {
+        return { duration: 3.4 };
+      }
+      createGain() {
+        return {
+          gain: {
+            setValueAtTime() {},
+            linearRampToValueAtTime() {},
+            exponentialRampToValueAtTime() {},
+          },
+          connect() {},
+          disconnect() {},
+        };
+      }
+      createOscillator() {
+        const oscillator = {
+          frequency: { value: 0 },
+          type: '',
+          onended: null as (() => void) | null,
+          connect() {},
+          disconnect() {},
+          start() {},
+          stop() {
+            oscillator.onended?.();
+          },
+        };
+        return oscillator;
+      }
+      createBufferSource() {
+        const source = {
+          buffer: null,
+          onended: null as (() => void) | null,
+          connect() {},
+          disconnect() {},
+          start() {},
+          stop() {
+            source.onended?.();
+          },
+        };
+        return source;
+      }
+    }
+    Object.assign(window, { AudioContext: TestAudio });
+  });
+}
 async function realMode(page: Page) {
   await page.getByRole('button', { name: 'Options' }).click();
   await page.getByRole('checkbox', { name: 'Demo' }).uncheck();
@@ -1687,6 +1740,7 @@ test('an unsupported browser locale falls back to English', async ({
 test('language changes in Configure, Cook and Ready preserve the committed timer and sound state', async ({
   page,
 }) => {
+  await availableAudio(page);
   await setup(page);
   await page.getByRole('button', { name: 'L · 70 grams' }).click();
   await page.getByRole('button', { name: 'Options' }).click();
