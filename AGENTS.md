@@ -31,6 +31,7 @@ Read `docs/planning/status.md` for the active objective and next action, then `d
 - Keep the MVP specification and implementation consistent as discovery evolves: reconcile all accepted behavior changes in the living MVP and affected user docs, specifications, decisions, and backlog status in the same change. Preserve historical evidence and deferred scope separately. Record a durable handoff in `docs/planning/status.md` when work spans sessions.
 - Treat skipped, blocked, and untested as different from passed. Source tests, artifact tests, and human acceptance are distinct evidence.
 - Follow `docs/operations/releases.md` for releases. Preparation is local; publication must be within the maintainer's authorized scope.
+- Before sharing a release tag, wait for Linux Verify on the exact commit and run `npm run release:preflight -- vVERSION`. Reuse passing evidence for unchanged inputs; inspect failures before retrying. Keep one canonical release record and link it from status and the delivery ledger.
 
 ## Code Review Rules
 

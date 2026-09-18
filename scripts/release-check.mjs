@@ -40,7 +40,7 @@ export function validateMetadata(pkg, lock, project, changelog, tag) {
     throw new Error('Add a dated changelog section for this version.');
 }
 
-export function releaseCheck(tag) {
+export function sourceCheck(tag) {
   const git = (...args) =>
     execFileSync('git', args, { encoding: 'utf8' }).trim();
   if (realpathSync(git('rev-parse', '--show-toplevel')) !== realpathSync('.'))
@@ -56,9 +56,18 @@ export function releaseCheck(tag) {
     tag,
   );
   const commit = git('rev-parse', 'HEAD');
-  if (git('rev-parse', `${tag}^{commit}`) !== commit)
-    throw new Error('HEAD is not the requested release tag.');
   return { version: pkg.version, commit, tag };
+}
+
+export function releaseCheck(tag) {
+  const identity = sourceCheck(tag);
+  const git = (...args) =>
+    execFileSync('git', args, { encoding: 'utf8' }).trim();
+  if (git('cat-file', '-t', `refs/tags/${tag}`) !== 'tag')
+    throw new Error('Release tags must be annotated.');
+  if (git('rev-parse', `refs/tags/${tag}^{commit}`) !== identity.commit)
+    throw new Error('HEAD is not the requested release tag.');
+  return identity;
 }
 
 if (

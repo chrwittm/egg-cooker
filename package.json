@@ -35,7 +35,10 @@
     "verify:all": "npm run verify && npm run test:e2e",
     "audit:prod": "npm audit --omit=dev",
     "audit:all": "npm audit",
-    "release:check": "node scripts/release-check.mjs"
+    "release:check": "node scripts/release-check.mjs",
+    "release:preflight": "node scripts/release-preflight.mjs",
+    "release:package": "node scripts/package-release.mjs",
+    "release:smoke": "node scripts/smoke-release.mjs"
   },
   "dependencies": {
     "svelte": "5.57.0"

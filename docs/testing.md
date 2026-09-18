@@ -2,18 +2,21 @@
 
 Tests are feedback about product contracts. More tests do not automatically mean more confidence; cover the paths whose failure would affect the user and the boundaries most likely to regress.
 
-| Command                 | What it establishes                                                             |
-| ----------------------- | ------------------------------------------------------------------------------- |
-| `npm run check`         | Svelte/TypeScript consistency and a domain check without DOM/Node ambient types |
-| `npm run lint`          | Code and selected architecture conventions                                      |
-| `npm run format:check`  | Consistent source/document formatting                                           |
-| `npm run check:docs`    | Local Markdown file targets exist; not anchor or external-URL validity          |
-| `npm test`              | Pure rule tests and script regression tests                                     |
-| `npm run test:coverage` | Diagnostic domain coverage report; no arbitrary global percentage gate          |
-| `npm run verify`        | All source/document checks, tests, and production build                         |
-| `npm run test:e2e`      | Browser tests against an already built `dist/`                                  |
-| `npm run verify:all`    | Full normal completion/CI gate, including production-browser tests              |
-| `npm run audit:all`     | Current npm advisory lookup for the complete dependency tree; needs network     |
+| Command                                         | What it establishes                                                                                 |
+| ----------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `npm run check`                                 | Svelte/TypeScript consistency and a domain check without DOM/Node ambient types                     |
+| `npm run lint`                                  | Code and selected architecture conventions                                                          |
+| `npm run format:check`                          | Consistent source/document formatting                                                               |
+| `npm run check:docs`                            | Local Markdown file targets exist; not anchor or external-URL validity                              |
+| `npm test`                                      | Pure rule tests and script regression tests                                                         |
+| `npm run test:coverage`                         | Diagnostic domain coverage report; no arbitrary global percentage gate                              |
+| `npm run verify`                                | All source/document checks, tests, and production build                                             |
+| `npm run test:e2e`                              | Browser tests against an already built `dist/`                                                      |
+| `npm run verify:all`                            | Full normal completion/CI gate, including production-browser tests                                  |
+| `npm run audit:all`                             | Current npm advisory lookup for the complete dependency tree; needs network                         |
+| `npm run release:preflight -- vVERSION`         | Pinned tools, clean release metadata/origin and successful exact-commit Linux Verify before tagging |
+| `npm run release:check -- vVERSION`             | Clean release identity and annotated tag at HEAD                                                    |
+| `npm run release:smoke -- URL VERSION FULL_SHA` | Served artifact/live identity, assets, cooking flow and reload; no provider/device acceptance       |
 
 ## Baseline evidence
 
@@ -22,6 +25,8 @@ The [accepted MVP matrix](product/specifications/0001-mvp.md) assigns domain, in
 The old checklist tests were replaced by the MVP domain, adapter and cooking-journey suites described below. Browser tests run Chromium, Firefox, and mobile-viewport WebKit. A real browser tests integration; the framework-independent rules do not need jsdom. Add component tests if they offer clearer/faster coverage for a complex component, rather than installing every testing layer at initialization.
 
 Browser tests use roles and labels, no fixed sleeps, and no retry allowance to hide flakiness. The preview server uses a strict port and will not silently reuse another running app. HTML reports, traces, and failure screenshots are ignored locally and uploaded on CI failure with short retention. Use synthetic data; traces may contain page content.
+
+Verify runs on Linux with `/egg-cooker/`; the candidate explicitly uses `./` and Pages determines its host path. Inspect the exact commit's Verify result before tagging. Release candidate and Pages builds also retain browser failure diagnostics. Stabilize incidental capabilities in presentation tests (for example audio availability in a language-state test), while preserving separate tests of real adapters and their failures. Do not repeatedly rerun unchanged deterministic failures.
 
 For subpath verification (such as Pages), build and test with the same path:
 

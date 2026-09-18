@@ -14,6 +14,10 @@
 
 Version, build commit, filename/checksum, CI run where applicable. Record who performed real-device or human acceptance and on which artifact. Never fill this section from assumption.
 
+For a release, record the exact-commit Linux Verify, candidate and Pages run URLs; the downloadable and hosted base paths; candidate/public-download checksum comparison; archive and hosted `release:smoke` results; and device/OS/source identity. If device acceptance predates the final commit, name the intervening changes and any affected retest. Link to this record from status/ledger instead of duplicating it there.
+
 ## Limits and follow-up
 
 Unverified claims, confirmed defects, accepted risks with owner/review trigger, and next action. Large/private artifacts belong outside committed docs.
+
+For an interrupted release, include the last completed stage, next command, source/tag/run IDs, retained candidate location/checksum and publication authorization already given. At completion, note material deviations, their causes and a useful process correction. Not run, blocked and failed are distinct from passed; identify any accepted limitation explicitly.

@@ -84,6 +84,12 @@ Parallel agents are optional. Use them when explicitly chosen and tasks have sep
 
 Read the relevant code, make the smallest coherent change, run the focused check, inspect the diff, and then run the documented completion gate. Use deterministic fixtures; control time and randomness through inputs/adapters when relevant. Fix the underlying cause of a failed check. A dependency override, disabled lint rule, broadened snapshot, or skipped assertion needs a real explanation, not merely a green result.
 
+Bring the highest-risk platform check forward. For localized layout, inspect the longest language at narrow width and text zoom; for sound/icons, get a production preview onto the actual phone while corrections are still cheap. Push the reviewed implementation within existing authorization and inspect Linux CI before release preparation. Local macOS WebKit cannot establish Linux WebKit behavior.
+
+Keep unrelated browser capabilities out of state/presentation tests. A language test can control audio availability, while separate adapter/failure tests and actual-device listening establish the audio contract. Do not mock the integration that a test exists to prove. On failure, record the failing assertion and environment, inspect its trace, and distinguish product behavior, test coupling and runner failure before changing code or retrying.
+
+Use focused checks while editing and one full completion gate on the resulting code. Reuse passing evidence for unchanged source, environment and build path; rerun when any of those relevant inputs change. A fresh Linux candidate and a Pages-path build establish different outputs, but another identical local full run without a new concern adds little. Avoid unrelated refactoring or runtime upgrades during a release correction.
+
 Branches and worktrees isolate experiments and simultaneous work. For a solo project, a short-lived branch and a PR can provide an excellent review artifact; do not require an external reviewer for every small change. A direct, reviewed commit is reasonable for a low-risk correction if repository rules allow it. Avoid mixing feature work with unrelated refactors or toolchain upgrades.
 
 Keep the agent's loop executable with standard scripts. The repository has `verify` for source/build checks and `verify:all` to add production-browser tests. Extend those commands when a new product promise needs another gate; commands repeated only in prose tend to be forgotten.
@@ -103,6 +109,8 @@ Report “implemented; device acceptance pending” when that is the evidence. R
 ## 8. Ship the thing that was tested
 
 Follow [releases](operations/releases.md). Source version, tag, build metadata, release notes, and artifact checksum must agree. Test the production build and, when applicable, the installed desktop app, live subpath, persistence restart, or restored backup. A successful development server is insufficient for those promises.
+
+Wait for Linux Verify on the exact release commit and run `release:preflight` before sharing its tag. Use the Linux candidate as the authoritative downloadable artifact, and the reusable `release:smoke` for archive and live checks. Preserve one canonical release evidence record with links from status and the ledger. Acceptance on an earlier source must name the intervening changes; repeat the affected human check after a behavior, layout or asset correction.
 
 Keep preparation and publication distinct so the maintainer can review a concrete artifact. If publication was already authorized, complete it and verify the result without asking again. If it was not, prepare the candidate and request the final decision with its version, evidence, known issues, and distribution target.
 

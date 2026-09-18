@@ -1,8 +1,8 @@
 # Current work
 
 **State:** FEAT-007 is released as experimental v0.1.2; the rejected v0.1.1 candidate remains preserved and unpublished.
-**Active item:** No product implementation is active. [FEAT-007](../product/specifications/0005-release-polish.md) is complete with tagged, downloadable and deployed evidence.
-**Next action:** Select the next backlog item deliberately. Kitchen calibration remains ready under [TECH-001](backlog.md); broader actual-device evidence and GitHub Actions runtime maintenance remain separate work.
+**Active item:** Release-method improvements are implemented locally after the v0.1.2 retrospective; no product behavior changed. [Methodology evidence](../delivery/2026-09-18-release-methodology-verification.md). [FEAT-007](../product/specifications/0005-release-polish.md) remains released.
+**Next action:** Review/commit the methodology changes and validate the updated workflows after an authorized push. On the next release, push the reviewed source without a tag, wait for its Linux Verify, then run `release:preflight`. No new version/tag/publication was created for this maintenance work. Kitchen calibration, broader device evidence and Actions runtime maintenance remain separate backlog work.
 
 ## Handoff
 
