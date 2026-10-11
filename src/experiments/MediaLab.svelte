@@ -31,6 +31,7 @@
   let warning = $state('');
   let log = $state<LabLog>(emptyLog());
   let runID = $state<string | null>(null);
+  let recoveredID = $state<string | null>(null);
   let now = $state(Date.now());
   let mediaSeconds = $state(0);
   let revision = $state(0);
@@ -266,6 +267,7 @@
       publish,
     );
     publish();
+    recoveredID = log.runs.at(-1)?.id ?? null;
     mounted = true;
     const lifecycle = () => {
       player?.observe(document.hidden ? 'hidden' : 'visible');
@@ -481,7 +483,7 @@
         )} · {latest.status}
       </p>
       <p class="muted">Committed target: {clockTime(latest.targetAtMs)}</p>
-      {#if latest.status === 'interrupted'}
+      {#if latest.id === recoveredID}
         <p class="status" role="status">
           Previous test recovered. Playback has not been restarted.
         </p>

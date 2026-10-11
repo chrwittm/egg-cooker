@@ -165,3 +165,22 @@ it('preserves interruption across navigation decoder errors while real errors st
   expect(f.player.active?.status).toBe('failed');
   expect(f.player.active?.heard).toBe('unrecorded');
 });
+
+it('restores a genuine failed playback with the same identity/deadline and no replay', async () => {
+  const f = fixture();
+  await f.player.start(settings, 'media-lab-1.abcdef', id, capabilities);
+  f.events.dispatchEvent(new Event('error'));
+  const target = f.player.active?.targetAtMs;
+  const reopened = new TrialPlayer(
+    f.audio,
+    f.storage,
+    () => 1_800_000_000_100,
+    () => false,
+    () => {},
+  );
+  expect(reopened.active).toBeNull();
+  expect(reopened.log.runs[0]?.id).toBe(id);
+  expect(reopened.log.runs[0]?.targetAtMs).toBe(target);
+  expect(reopened.log.runs[0]?.status).toBe('failed');
+  expect(reopened.log.runs[0]?.heard).toBe('unrecorded');
+});

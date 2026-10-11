@@ -120,7 +120,7 @@ test('phone layout and accessibility', async ({ page }) => {
   ).toBe(true);
 });
 
-test('cold reopening an active test preserves its deadline without restarting audio', async ({
+test('cold reopening preserves the deadline and recorded playback outcome without replay', async ({
   page,
 }) => {
   await page.goto('/');
@@ -147,7 +147,20 @@ test('cold reopening an active test preserves its deadline without restarting au
   );
   expect(recovered.id).toBe(first.id);
   expect(recovered.targetAtMs).toBe(first.targetAtMs);
-  expect(recovered.status).toBe('interrupted');
+  const names = recovered.events.map((event: { name: string }) => event.name);
+  // A diagnostic instrument must preserve a genuine codec failure, too. Linux
+  // Firefox can advance a quiet MP3 briefly and then emit MEDIA_ERR_DECODE.
+  // Event evidence determines the exact terminal result; navigation-context
+  // errors alone do not turn interrupted playback into an unrelated failure.
+  const expectedStatus = names.some(
+    (name: string) =>
+      name.startsWith('media-error:') || name === 'play-rejected',
+  )
+    ? 'failed'
+    : names.includes('ended')
+      ? 'ended'
+      : 'interrupted';
+  expect(recovered.status).toBe(expectedStatus);
   expect(recovered.heard).toBe('unrecorded');
   expect(
     await page.locator('audio').evaluate((a: HTMLAudioElement) => a.paused),
