@@ -29,6 +29,10 @@ export default [
     languageOptions: { parserOptions: { parser: tseslint.parser } },
   },
   {
+    files: ['src/experiments/**/*.svelte'],
+    languageOptions: { globals: { __MEDIA_LAB_BUILD__: 'readonly' } },
+  },
+  {
     files: ['src/domain/**/*.ts'],
     ignores: ['**/*.test.ts'],
     rules: {

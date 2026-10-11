@@ -1,5 +1,7 @@
 # Product context
 
+**Current technical experiment:** The maintainer reaffirmed GitHub Pages-only deployment on 2026-10-11 and authorized a separate [media feasibility page](../delivery/2026-10-11-web-media-feasibility.md). It tests user-started background audio and static Lock Screen media presentation; no device result or product background-alarm promise exists yet. No native host or backend is part of this experiment.
+
 **Status:** Experimental v0.1.2 is published and deployed. The bounded language, identity and alarm polish from [0005](specifications/0005-release-polish.md) passed the local and Linux release gates plus foreground Safari/Home Screen acceptance on an iPhone 16 Pro with iOS 26.6.2 on 2026-09-17. The unpublished v0.1.1 candidate remains preserved after its Linux gate failure. Kitchen calibration and broader actual-device evidence remain explicit backlog work, not release claims.
 
 - **User and outcome:** A person making eggs wants a simple, engaging cooking instrument with minimal cognitive load. An original animated egg cross-section changes alongside the calculated timeline.
