@@ -26,6 +26,10 @@ function fixture() {
     paused: true,
     ended: false,
     error: null,
+    load: () => {
+      audio.currentTime = 0;
+      audio.paused = true;
+    },
     play: async () => {
       audio.paused = false;
       events.dispatchEvent(new Event('playing'));

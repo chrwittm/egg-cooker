@@ -8,6 +8,7 @@ export type MediaAudio = Pick<
   | 'paused'
   | 'ended'
   | 'play'
+  | 'load'
   | 'pause'
   | 'addEventListener'
   | 'removeEventListener'
@@ -96,7 +97,6 @@ export class TrialPlayer {
   ) {
     if (this.active) return;
     const generation = ++this.generation;
-    this.audio.currentTime = 0;
     const run = beginTrial(settings, this.now(), id, build, capabilities);
     this.active = run;
     this.log.runs = [...this.log.runs.slice(-19), run];
@@ -104,6 +104,11 @@ export class TrialPlayer {
     this.navigating = false;
     this.observe('start-requested');
     try {
+      // A freshly prepared resource already starts at zero. Touch neither its
+      // seek position nor loader: Firefox can reject the zero-time seek, and
+      // WebKit can reject an unnecessary Blob reload once offline. Reset only
+      // a previously played resource when repeating the same test.
+      if (this.audio.currentTime > 0 || this.audio.ended) this.audio.load();
       // Called synchronously from the Start gesture; nothing asynchronous occurs
       // between capture of the deadline and asking the media element to play.
       await this.audio.play();
