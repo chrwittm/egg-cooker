@@ -1,5 +1,9 @@
 # Egg Cooker privacy
 
+## Separate Media Lab experiment
+
+The optional [web-media test page](docs/delivery/2026-10-11-web-media-feasibility.md) stores only its diagnostic record under `egg-cooker.media-lab.v1` in local browser storage: up to 20 runs, bounded media-event observations, manually entered phone model/OS, selected test conditions and your observations. It does not read the cooking app's records or request location/microphone access. Export downloads the results for you to share; Clear removes the lab record. Diagnostics are not uploaded. The lab downloads static audio/artwork from GitHub Pages; ordinary hosting requests remain subject to the hosting provider's policies. The experiment does not change the published cooking app's behavior below.
+
 **Updated: 2026-09-17.** Cooking calculations and the animated timer run in your browser. There are no accounts, analytics, application backend or cloud history.
 
 ## This tab's active timer

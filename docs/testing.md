@@ -46,6 +46,8 @@ BASE_PATH=/example/ npm run verify:all
 
 ## What automation does not establish
 
+The [web-media experiment](delivery/2026-10-11-web-media-feasibility.md) adds `npm run verify:media-lab` after the product gate in Linux Verify. It checks fixture identities and real HTML media integration in production Chromium/Firefox/WebKit, including local diagnostics, pause/reload, offline playback and narrow-screen accessibility. Real iPhone locked-screen sound and system media presentation require the recorded manual procedure; browser automation cannot establish them.
+
 Playwright WebKit is not proof of every iPhone/Safari behavior. axe is not a complete accessibility audit. Before a tester/public release, perform a keyboard-only pass, visible-focus check, zoom/reflow on a narrow viewport, readable errors, and a screen-reader sanity check on the actual supported device. For device permissions, media, offline/PWA, backgrounding, and packaging, perform the relevant real-device checks and record version/artifact identity.
 
 Record a failed or unavailable check honestly. An environment skip is not a pass. The release record must distinguish source verification, artifact verification, human acceptance, and deployment smoke results.

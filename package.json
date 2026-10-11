@@ -38,7 +38,11 @@
     "release:check": "node scripts/release-check.mjs",
     "release:preflight": "node scripts/release-preflight.mjs",
     "release:package": "node scripts/package-release.mjs",
-    "release:smoke": "node scripts/smoke-release.mjs"
+    "release:smoke": "node scripts/smoke-release.mjs",
+    "build:media-lab": "vite build --config vite.media.config.ts",
+    "preview:media-lab": "vite preview --config vite.media.config.ts --host 127.0.0.1 --port 4175",
+    "test:media-lab": "playwright test --config playwright.media.config.ts",
+    "verify:media-lab": "node scripts/check-media-tracks.mjs && npm run build:media-lab && npm run test:media-lab"
   },
   "dependencies": {
     "svelte": "5.57.0"

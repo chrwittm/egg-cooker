@@ -1,0 +1,50 @@
+{
+  "sourceSha256": "1db417d0bced989e534683dcba90708f5ec5d037ae9caf95ae1ea7b8642d3a90",
+  "ffmpeg": "ffmpeg version 8.0.1 Copyright (c) 2000-2025 the FFmpeg developers",
+  "tracks": [
+    {
+      "file": "rooster-60-quiet.mp3",
+      "targetSeconds": 60,
+      "variant": "quiet",
+      "durationSeconds": 63.400249,
+      "codec": "mp3",
+      "sampleRate": 44100,
+      "channels": 1,
+      "bytes": 265361,
+      "sha256": "fb35298c66b7b9972704a4c3ed6b1370a455ed032f9e1a46e0d9a50675befdcc"
+    },
+    {
+      "file": "rooster-60-ticks.mp3",
+      "targetSeconds": 60,
+      "variant": "ticks",
+      "durationSeconds": 63.400249,
+      "codec": "mp3",
+      "sampleRate": 44100,
+      "channels": 1,
+      "bytes": 265755,
+      "sha256": "17aa9cf67b0fd70c8c79170a3f095d7e568bde8cf0f9f42604fe3b8f483a5538"
+    },
+    {
+      "file": "rooster-300-quiet.mp3",
+      "targetSeconds": 300,
+      "variant": "quiet",
+      "durationSeconds": 303.4,
+      "codec": "mp3",
+      "sampleRate": 44100,
+      "channels": 1,
+      "bytes": 1220810,
+      "sha256": "435af2f4962071b651b8ea1d6e7023567ea7ae6ae4f0077b1553c7c0d1a6ec65"
+    },
+    {
+      "file": "rooster-300-ticks.mp3",
+      "targetSeconds": 300,
+      "variant": "ticks",
+      "durationSeconds": 303.4,
+      "codec": "mp3",
+      "sampleRate": 44100,
+      "channels": 1,
+      "bytes": 1221201,
+      "sha256": "653ccfcc602db476ed13df04ce79558f38a03997feaab28fad9a5d3aef258ad9"
+    }
+  ]
+}
