@@ -140,3 +140,24 @@ describe('media trial lifecycle', () => {
     expect(f.data.has(LAB_KEY)).toBe(false);
   });
 });
+
+it('preserves interruption across navigation decoder errors while real errors still fail', async () => {
+  const f = fixture();
+  await f.player.start(settings, 'media-lab-1.abcdef', id, capabilities);
+  f.player.leaving();
+  f.events.dispatchEvent(new Event('error'));
+  expect(f.player.active?.status).toBe('playing');
+  expect(f.player.active?.events.at(-1)?.name).toBe('navigation-media-error:0');
+  const reopened = new TrialPlayer(
+    f.audio,
+    f.storage,
+    () => 1_800_000_000_100,
+    () => false,
+    () => {},
+  );
+  expect(reopened.log.runs[0]?.status).toBe('interrupted');
+  f.player.returned();
+  f.events.dispatchEvent(new Event('error'));
+  expect(f.player.active?.status).toBe('failed');
+  expect(f.player.active?.heard).toBe('unrecorded');
+});

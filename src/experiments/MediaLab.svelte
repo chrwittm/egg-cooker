@@ -272,9 +272,13 @@
       if (document.hidden) cancelAnimationFrame(animation);
       else render();
     };
-    const hide = () => player?.observe('pagehide');
+    const leaving = () => player?.leaving();
+    const hide = () => {
+      player?.leaving();
+      player?.observe('pagehide');
+    };
     const show = () => {
-      player?.observe('pageshow');
+      player?.returned();
       render();
     };
     const positions = () => {
@@ -295,6 +299,7 @@
     };
     document.addEventListener('visibilitychange', lifecycle);
     window.addEventListener('pagehide', hide);
+    window.addEventListener('beforeunload', leaving);
     window.addEventListener('pageshow', show);
     audio.addEventListener('playing', positions);
     audio.addEventListener('pause', positions);
@@ -307,6 +312,7 @@
       if (objectURL) URL.revokeObjectURL(objectURL);
       document.removeEventListener('visibilitychange', lifecycle);
       window.removeEventListener('pagehide', hide);
+      window.removeEventListener('beforeunload', leaving);
       window.removeEventListener('pageshow', show);
       audio.removeEventListener('playing', positions);
       audio.removeEventListener('pause', positions);

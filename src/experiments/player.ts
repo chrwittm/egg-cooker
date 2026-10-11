@@ -20,6 +20,7 @@ export class TrialPlayer {
   private generation = 0;
   private handlers = new Map<string, EventListener>();
   private crossed = false;
+  private navigating = false;
   constructor(
     private audio: MediaAudio,
     private storage: Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>,
@@ -65,6 +66,14 @@ export class TrialPlayer {
     ]) {
       const listener = () => {
         if (!this.active) return;
+        if (this.navigating) {
+          this.observe(
+            name === 'error'
+              ? `navigation-media-error:${audio.error?.code ?? 0}`
+              : `navigation-${name}`,
+          );
+          return;
+        }
         if (name === 'pause' && !audio.ended) this.active.status = 'paused';
         if (name === 'playing') this.active.status = 'playing';
         if (name === 'ended' || name === 'error') {
@@ -92,6 +101,7 @@ export class TrialPlayer {
     this.active = run;
     this.log.runs = [...this.log.runs.slice(-19), run];
     this.crossed = false;
+    this.navigating = false;
     this.observe('start-requested');
     try {
       // Called synchronously from the Start gesture; nothing asynchronous occurs
@@ -101,6 +111,10 @@ export class TrialPlayer {
         this.observe('play-resolved');
     } catch {
       if (generation !== this.generation || !this.active) return;
+      if (this.navigating) {
+        this.observe('navigation-play-rejected');
+        return;
+      }
       this.active.status = 'failed';
       this.active.finishedAtMs = this.now();
       this.observe('play-rejected');
@@ -130,6 +144,24 @@ export class TrialPlayer {
       this.crossed = true;
       this.observe('media-position-reached-target');
     }
+  }
+  leaving() {
+    // Navigating can terminate a decoder before pagehide (Firefox/Linux).
+    // Record its errors, but keep the recoverable interrupted trial distinct
+    // from a decoder failure observed while the page is still in use.
+    this.observe('navigation-started');
+    this.navigating = true;
+  }
+  returned() {
+    this.navigating = false;
+    if (this.active && ['playing', 'paused'].includes(this.active.status)) {
+      this.active.status = this.audio.ended
+        ? 'ended'
+        : this.audio.paused
+          ? 'paused'
+          : 'playing';
+    }
+    this.observe('pageshow');
   }
   stop() {
     if (!this.active) return;
