@@ -126,6 +126,13 @@ test('cold reopening an active test preserves its deadline without restarting au
   await page.goto('/');
   await expect(page.getByRole('button', { name: 'Start test' })).toBeEnabled();
   await page.getByRole('button', { name: 'Start test' }).click();
+  await expect
+    .poll(() =>
+      page
+        .locator('audio')
+        .evaluate((a: HTMLAudioElement) => !a.paused && a.currentTime > 0),
+    )
+    .toBe(true);
   const first = await page.evaluate(
     (k) => JSON.parse(localStorage.getItem(k)!).runs[0],
     key,

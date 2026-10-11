@@ -55,3 +55,7 @@ References: [Media Session specification](https://www.w3.org/TR/mediasession/), 
 - `npm run verify:media-lab` passed on the resulting experiment: four fixture identity checks and 18 browser checks across Chromium/Firefox/WebKit. Actual HTMLAudioElement playback, completion and pause are exercised; the sound integration is not replaced by a mock. Controlled unit tests separately exercise play rejection, Stop during pending play, repeated Start and storage failures.
 - Format, lint, Svelte/TypeScript, documentation links and `git diff --check` passed. A 390 px phone render was inspected; 320 px and enlarged-text checks passed.
 - No actual-device result is inferred from these passes. Published source/deployment results will be appended separately.
+
+### Linux failure inspected before retry
+
+[First Linux Verify](https://github.com/chrwittm/egg-cooker/actions/runs/38147222828) passed the product gate and 17/18 experiment checks. The Firefox cold-reopen test reloaded immediately after Start, before establishing that media was playing. On this runner, unloading rejected the still-pending play promise and correctly preserved a failed attempt, while the test expected an interrupted active playback. The downloaded trace/context showed the original deadline and failed result still present. The test now waits for actual media advancement before reloading; identity/deadline/no-replay assertions are unchanged. This fixes its precondition rather than substituting mock audio or treating the first run as passed.
